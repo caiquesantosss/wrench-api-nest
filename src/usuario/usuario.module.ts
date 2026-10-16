@@ -22,5 +22,7 @@ import { AuthenticateUserUseCase } from './application/use-cases/authenticate-us
     CreateUserUseCase, 
     AuthenticateUserUseCase
   ],
+
+  exports: [JwtModule]
 })
 export class UsuarioModule {}

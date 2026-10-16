@@ -1,8 +1,10 @@
-import { Controller, Post, Body, UsePipes, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, UsePipes, HttpCode, HttpStatus, UseGuards, Get } from '@nestjs/common';
 import { CreateUserUseCase } from '../application/use-cases/create-user-use-case';
 import { ZodValidationPipe } from '../shared/pipes/zod-validation-pipe';
 import { CreateUserDTO, createUserSchema } from './dtos/create-user-dto';
 import { AuthenticateUserDTO, authenticateUserSchema } from './dtos/authenticate-user-dto';
+import { JwtAuthGuard } from '../shared/guards/jwt-auth-guard';
+import { LoggedUser } from '../shared/decorators/logged-user-decorator';
 
 @Controller('users')
 export class UsuarioController {
@@ -21,5 +23,14 @@ export class UsuarioController {
     @UsePipes(new ZodValidationPipe(authenticateUserSchema))
     async login(@Body() body: AuthenticateUserDTO) {
         return await this.authenticateUserUseCase.execute(body)
+    }
+
+    @Get('me')
+    @UseGuards(JwtAuthGuard)
+    async me(@LoggedUser() currentUser: any) {
+        return {
+            mensagem: 'Acesso autorizado!',
+            dados_do_token: currentUser
+        };
     }
 }

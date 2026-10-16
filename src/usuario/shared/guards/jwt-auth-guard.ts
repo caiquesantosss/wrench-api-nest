@@ -1,0 +1,38 @@
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common'
+import { JwtService } from '@nestjs/jwt'
+import { FastifyRequest } from 'fastify'
+import { env } from '../../../env/env'
+
+@Injectable()
+export class JwtAuthGuard implements CanActivate {
+  constructor(private jwtService: JwtService) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest<FastifyRequest>()
+    
+    const token = this.extractTokenFromHeader(request)
+    
+    if (!token) {
+      throw new UnauthorizedException('Acesso negado. Token não fornecido.')
+    }
+
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: env.JWT_SECRET,
+      });
+      
+      // Anexa o payload ao objeto request para ser usado nos Controllers
+      (request as any).user = payload
+      
+    } catch {
+      throw new UnauthorizedException('Token inválido ou expirado.')
+    }
+    
+    return true
+  }
+
+  private extractTokenFromHeader(request: FastifyRequest): string | undefined {
+    const [type, token] = (request.headers.authorization || '').split(' ')
+    return type === 'Bearer' ? token : undefined
+  }
+}
