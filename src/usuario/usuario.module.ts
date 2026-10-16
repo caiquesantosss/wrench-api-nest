@@ -5,24 +5,30 @@ import { JwtModule } from '@nestjs/jwt';
 import { env } from '../env/env';
 import { CreateUserUseCase } from './application/use-cases/create-user-use-case';
 import { AuthenticateUserUseCase } from './application/use-cases/authenticate-user-use-case';
+import { BcryptHasher } from './infrastructure/cryptography/BcryptHasher';
 
 @Module({
   imports: [
     JwtModule.register({
-      secret: env.JWT_SECRET, 
+      secret: env.JWT_SECRET,
       signOptions: { expiresIn: '8h' },
     })
   ],
-  controllers: [UsuarioController], 
+  controllers: [UsuarioController],
   providers: [
+    BcryptHasher,
     {
-      provide: 'UserRepository', 
+      provide: "Hasher",
+      useExisting: BcryptHasher,
+    },
+    {
+      provide: 'UserRepository',
       useClass: PrismaUserRepository,
-    }, 
-    CreateUserUseCase, 
+    },
+    CreateUserUseCase,
     AuthenticateUserUseCase
   ],
 
   exports: [JwtModule]
 })
-export class UsuarioModule {}
+export class UsuarioModule { }

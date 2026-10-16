@@ -5,7 +5,9 @@ import { CreateUserDTO, createUserSchema } from './dtos/create-user-dto';
 import { AuthenticateUserDTO, authenticateUserSchema } from './dtos/authenticate-user-dto';
 import { JwtAuthGuard } from '../shared/guards/jwt-auth-guard';
 import { LoggedUser } from '../shared/decorators/logged-user-decorator';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Utilizadores')
 @Controller('users')
 export class UsuarioController {
     authenticateUserUseCase: any;
@@ -20,12 +22,15 @@ export class UsuarioController {
 
     @Post('login')
     @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Autenticar utilizador e gerar token JWT' })
     @UsePipes(new ZodValidationPipe(authenticateUserSchema))
     async login(@Body() body: AuthenticateUserDTO) {
         return await this.authenticateUserUseCase.execute(body)
     }
 
     @Get('me')
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({ summary: 'Obter dados do utilizador atualmente logado' })
     @UseGuards(JwtAuthGuard)
     async me(@LoggedUser() currentUser: any) {
         return {
