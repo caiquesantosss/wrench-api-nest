@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Cliente {
+  id_cliente    Int            @id @default(autoincrement())
+  nome          String         @db.VarChar(150)
+  documento     String         @unique @db.VarChar(20)
+  telefone      String?        @db.VarChar(20)
+  email         String?        @db.VarChar(100)
+  endereco      String?        @db.VarChar(255)
+  ativo         Boolean        @default(true)
+  data_cadastro DateTime       @default(now())
+  
+  ativos        Ativo[]
+  ordens_servico OrdemServico[]
+
+  @@map("cliente")
+}
+
+model Usuario {
+  id_usuario    Int            @id @default(autoincrement())
+  nome          String         @db.VarChar(150)
+  email         String         @unique @db.VarChar(100)
+  senha_hash    String         @db.VarChar(255)
+  perfil        String         @db.VarChar(20)
+  ativo         Boolean        @default(true)
+  data_cadastro DateTime       @default(now())
+
+  ordens_servico OrdemServico[]
+  auditorias     Auditoria[]
+
+  @@map("usuario")
+}
+
+model Ativo {
+  id_ativo      Int            @id @default(autoincrement())
+  id_cliente    Int
+  descricao     String         @db.VarChar(150)
+  tipo          String         @db.VarChar(50)
+  marca         String?        @db.VarChar(80)
+  modelo        String?        @db.VarChar(80)
+  identificacao String?        @db.VarChar(100)
+  observacoes   String?        @db.Text
+  ativo         Boolean        @default(true)
+  data_cadastro DateTime       @default(now())
+
+  cliente       Cliente        @relation(fields: [id_cliente], references: [id_cliente])
+  ordens_servico OrdemServico[]
+
+  @@map("ativo")
+}
+
+model CatalogoItem {
+  id_catalogo_item Int         @id @default(autoincrement())
+  descricao        String      @db.VarChar(150)
+  tipo_item        String      @db.VarChar(20) // PECA ou SERVICO
+  unidade          String?     @db.VarChar(20)
+  valor_unitario   Decimal     @db.Decimal(12, 2)
+  estoque_atual    Decimal?    @db.Decimal(12, 3)
+  estoque_minimo   Decimal?    @db.Decimal(12, 3)
+  ativo            Boolean     @default(true)
+  data_cadastro    DateTime    @default(now())
+
+  itens_os         ItemOS[]
+
+  @@map("catalogo_item")
+}
+
+model OrdemServico {
+  id_ordem_servico   Int         @id @default(autoincrement())
+  id_cliente         Int
+  id_ativo           Int
+  id_usuario         Int
+  status             String      @db.VarChar(20)
+  descricao_problema String      @db.Text
+  diagnostico        String?     @db.Text
+  solucao_aplicada   String?     @db.Text
+  valor_mao_obra     Decimal?    @db.Decimal(12, 2)
+  valor_pecas        Decimal?    @db.Decimal(12, 2)
+  valor_total        Decimal?    @db.Decimal(12, 2)
+  
+  data_abertura      DateTime    @default(now())
+  data_previsao      DateTime?
+  data_conclusao     DateTime?
+  data_atualizacao   DateTime    @updatedAt
+
+  cliente            Cliente     @relation(fields: [id_cliente], references: [id_cliente])
+  ativo              Ativo       @relation(fields: [id_ativo], references: [id_ativo])
+  usuario            Usuario     @relation(fields: [id_usuario], references: [id_usuario])
+  
+  itens_os           ItemOS[]
+  financeiros        Financeiro[]
+
+  @@map("ordem_servico")
+}
+
+model ItemOS {
+  id_item_os       Int           @id @default(autoincrement())
+  id_ordem_servico Int
+  id_catalogo_item Int
+  quantidade       Decimal       @db.Decimal(12, 3)
+  valor_unitario   Decimal       @db.Decimal(12, 2)
+  valor_total      Decimal       @db.Decimal(12, 2)
+  status_aprovacao String?       @db.VarChar(20)
+  baixa_estoque    Boolean       @default(false)
+  data_cadastro    DateTime      @default(now())
+
+  ordem_servico    OrdemServico  @relation(fields: [id_ordem_servico], references: [id_ordem_servico])
+  catalogo_item    CatalogoItem  @relation(fields: [id_catalogo_item], references: [id_catalogo_item])
+
+  @@map("item_os")
+}
+
+model Financeiro {
+  id_financeiro    Int           @id @default(autoincrement())
+  id_ordem_servico Int
+  descricao        String        @db.VarChar(255)
+  tipo_lancamento  String        @db.VarChar(20)
+  status_pagamento String        @db.VarChar(20)
+  valor            Decimal       @db.Decimal(12, 2)
+  forma_pagamento  String?       @db.VarChar(30)
+  referencia_externa String?     @db.VarChar(150)
+  data_vencimento  DateTime?     @db.Date
+  data_pagamento   DateTime?
+  data_cadastro    DateTime      @default(now())
+
+  ordem_servico    OrdemServico  @relation(fields: [id_ordem_servico], references: [id_ordem_servico])
+
+  @@map("financeiro")
+}
+
+model Auditoria {
+  id_auditoria     Int           @id @default(autoincrement())
+  id_usuario       Int
+  tabela_afetada   String        @db.VarChar(100)
+  operacao         String        @db.VarChar(20)
+  registro_id      Int
+  descricao        String?       @db.Text
+  dados_anteriores Json?
+  dados_novos      Json?
+  data_evento      DateTime      @default(now())
+
+  usuario          Usuario       @relation(fields: [id_usuario], references: [id_usuario])
+
+  @@map("auditoria")
+}
