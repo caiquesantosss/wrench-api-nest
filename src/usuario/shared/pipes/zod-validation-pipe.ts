@@ -1,22 +1,23 @@
-import { PipeTransform, Injectable, ArgumentMetadata, BadRequestException } from '@nestjs/common';
-import { z } from 'zod';
+import { PipeTransform, ArgumentMetadata, BadRequestException } from '@nestjs/common';
+import { ZodSchema, ZodError } from 'zod';
 
-@Injectable()
 export class ZodValidationPipe implements PipeTransform {
-  constructor(private schema: z.ZodType) {}
+  constructor(private schema: ZodSchema) {}
 
   transform(value: unknown, metadata: ArgumentMetadata) {
     try {
-      const parsedValue = this.schema.parse(value);
-      return parsedValue;
-    } catch (error: any) {
-      throw new BadRequestException({
-        message: 'Erro de validação dos dados enviados.',
-        erros: error.errors.map((err: any) => ({
-          campo: err.path.join('.'),
-          mensagem: err.message,
-        })),
-      });
+      return this.schema.parse(value);
+    } catch (error) {
+      if (error instanceof ZodError) {
+        throw new BadRequestException({
+          message: 'Erro de validação',
+          statusCode: 400,
+          errors: error.format()
+        });
+      }
+
+      console.error('Erro no ZodValidationPipe (Schema pode estar undefined):', error);
+      throw new BadRequestException('Falha interna ao processar a validação.');
     }
   }
 }

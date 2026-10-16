@@ -17,7 +17,7 @@ export class AuthenticateUserUseCase {
 
     async execute(data: {
         email: string
-        password: string
+        senha: string
     }): Promise<{
         token: string
         perfil: string
@@ -30,7 +30,7 @@ export class AuthenticateUserUseCase {
         }
 
         const isPasswordValid = await this.hasher.compare(
-            data.password,
+            data.senha,
             user.senha_hash
         )
 

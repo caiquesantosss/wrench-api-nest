@@ -3,12 +3,15 @@ import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { AppModule } from './app.module'
+import { env } from './env/env'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({ logger: true })
   )
+
+  app.setGlobalPrefix('api')
 
   const config = new DocumentBuilder()
     .setTitle('WrenchOS API')
@@ -30,11 +33,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('api/docs', app, document)
 
-  app.setGlobalPrefix('api')
-
-  await app.listen(3333, '0.0.0.0')
+  await app.listen(env.PORT, '0.0.0.0')
   console.log('🚀 WrenchOS Server on!')
-  console.log('📚 Documentação Swagger disponível em http://localhost:3333/api/docs')
+  console.log('📚 Documentação Swagger disponível em http://localhost:3030/api/docs')
 }
 
 bootstrap()
