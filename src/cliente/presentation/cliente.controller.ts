@@ -28,6 +28,8 @@ import {
     createAssetSchema,
     CreateAssetDto,
 } from '../application/dtos/create-asset.dto';
+import { RoleGuard } from '../shared/guards/roles.guard';
+import { Roles } from '../shared/decorators/roles.decorator';
 
 @ApiTags('Clientes e Ativos')
 @ApiBearerAuth('JWT-auth')
@@ -37,9 +39,11 @@ export class ClienteController {
     constructor(
         private readonly createClientUseCase: CreateClientUseCase,
         private readonly createAssetUseCase: CreateAssetUseCase,
-    ) {}
+    ) { }
 
     @Post()
+    @Roles('ATENDENTE')
+    @UseGuards(RoleGuard)
     @ApiOperation({
         summary: 'Cadastrar um novo cliente',
     })
@@ -92,6 +96,8 @@ export class ClienteController {
     }
 
     @Post('ativos')
+    @Roles('ATENDENTE')
+    @UseGuards(RoleGuard)
     @ApiOperation({
         summary: 'Cadastrar um novo ativo para um cliente existente',
     })
