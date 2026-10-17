@@ -26,12 +26,12 @@ import { ZodValidationPipe } from '../shared/pipes/zod-validation-pipe';
 import {
     CreateUserDTO,
     createUserSchema,
-} from './dtos/create-user-dto';
+} from '../application/dtos/create-user.dto';
 
 import {
     AuthenticateUserDTO,
     authenticateUserSchema,
-} from './dtos/authenticate-user-dto';
+} from '../application/dtos/authenticate-user.dto';
 
 import { JwtAuthGuard } from '../shared/guards/jwt-auth-guard';
 import { LoggedUser } from '../shared/decorators/logged-user-decorator';
@@ -102,7 +102,7 @@ export class UsuarioController {
                     type: 'string',
                     example: 'joao@email.com',
                 },
-                password: {
+                senha: {
                     type: 'string',
                     example: 'Senha123!',
                 },

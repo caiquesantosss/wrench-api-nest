@@ -25,6 +25,7 @@ export class User {
 
     public static create(nome: string, email: string, senha_hash: string, perfil: string): User {
         const user = new User(nome, email, senha_hash, perfil)
+        user.StateValidation()
         return user
     }
 

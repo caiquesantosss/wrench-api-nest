@@ -3,42 +3,41 @@ import { PrismaService } from '../../../prisma/prisma.service'
 import { User } from '../../domain/entities/User'
 import { UserRepository } from '../../domain/repositories/UserRepository'
 
-@Injectable() 
+@Injectable()
 export class PrismaUserRepository implements UserRepository {
   constructor(private prisma: PrismaService) {}
 
   async findByEmail(email: string): Promise<User | null> {
-    const user = await this.prisma.usuario.findUnique({ where: { email } });
-    if (!user) return null;
+    const prismaUser = await this.prisma.usuario.findUnique({
+      where: { email },
+    });
 
-    return User.recover(
-      user.id_usuario,
-      user.nome,
-      user.email,
-      user.senha_hash,
-      user.perfil,
-      user.ativo
-    );
+    if (!prismaUser) return null;
+    return this.mapToDomainUser(prismaUser);
   }
 
-  async save(usuario: User): Promise<User> {
-    const user = await this.prisma.usuario.create({
+  async save(user: User): Promise<User> {
+    const createdPrismaUser = await this.prisma.usuario.create({
       data: {
-        nome: usuario.nome,
-        email: usuario.email,
-        senha_hash: usuario.senha_hash,
-        perfil: usuario.perfil,
-        ativo: usuario.ativo,
+        nome: user.nome,
+        email: user.email,
+        senha_hash: user.senha_hash,
+        perfil: user.perfil,
+        ativo: user.ativo,
       },
     });
 
+    return this.mapToDomainUser(createdPrismaUser);
+  }
+
+  private mapToDomainUser(prismaData: any): User {
     return User.recover(
-      user.id_usuario,
-      user.nome,
-      user.email,
-      user.senha_hash,
-      user.perfil,
-      user.ativo
+      prismaData.id_usuario,
+      prismaData.nome,
+      prismaData.email,
+      prismaData.senha_hash,
+      prismaData.perfil,
+      prismaData.ativo
     );
   }
 }
