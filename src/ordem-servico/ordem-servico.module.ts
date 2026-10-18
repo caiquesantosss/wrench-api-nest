@@ -7,6 +7,8 @@ import { UsuarioModule } from '../usuario/usuario.module'
 import { ClienteModule } from '../cliente/cliente.module'
 import { AddDiagnosticUseCase } from './application/use-cases/add-diagnostic-use-case'
 import { BudgetDefineUseCase } from './application/use-cases/budget-define-use-case'
+import { StartExecutionUseCase } from './application/use-cases/start-execution-use-case'
+import { FinishServiceUseCase } from './application/use-cases/finish-service-use-case'
 
 @Module({
   imports: [
@@ -21,7 +23,9 @@ import { BudgetDefineUseCase } from './application/use-cases/budget-define-use-c
     },
     OpenServiceOrderUseCase,
     AddDiagnosticUseCase, 
-    BudgetDefineUseCase
+    BudgetDefineUseCase, 
+    StartExecutionUseCase, 
+    FinishServiceUseCase
   ],
 })
 export class OrdemServicoModule {}

@@ -27,13 +27,18 @@ import { JwtAuthGuard } from '../../usuario/shared/guards/jwt-auth-guard'
 import { LoggedUser } from '../../usuario/shared/decorators/logged-user-decorator'
 import { ZodValidationPipe } from '../../usuario/shared/pipes/zod-validation-pipe'
 
-import { OpenServiceOrderUseCase } from '../application/use-cases/open-service-order-use-case'
 import { OpenOsDTO, openOsSchema } from '../application/dtos/open-os.dto'
-import { OrdemServicoMapper } from './mappers/ordem-serico.mappers'
 import { AddDiagnosticDTO, addDiagnosticSchema } from '../application/dtos/add-diagnostic.dto'
-import { AddDiagnosticUseCase } from '../application/use-cases/add-diagnostic-use-case'
 import { BudgetDefineDTO, budgetDefineSchema } from '../application/dtos/budget-define.dto'
+import { FinishServiceDTO, finishServiceSchema } from '../application/dtos/finish-service.dto'
+
+import { OrdemServicoMapper } from './mappers/ordem-serico.mappers'
+
+import { OpenServiceOrderUseCase } from '../application/use-cases/open-service-order-use-case'
+import { AddDiagnosticUseCase } from '../application/use-cases/add-diagnostic-use-case'
 import { BudgetDefineUseCase } from '../application/use-cases/budget-define-use-case'
+import { StartExecutionUseCase } from '../application/use-cases/start-execution-use-case'
+import { FinishServiceUseCase } from '../application/use-cases/finish-service-use-case'
 
 @ApiTags('Ordem de Serviço')
 @ApiBearerAuth('JWT-auth')
@@ -43,7 +48,9 @@ export class OrdemServicoController {
     constructor(
         private readonly openServiceOrderUseCase: OpenServiceOrderUseCase,
         private readonly addDiagnosticUseCase: AddDiagnosticUseCase,
-        private readonly budgetDefineUseCase: BudgetDefineUseCase
+        private readonly budgetDefineUseCase: BudgetDefineUseCase,
+        private readonly startExecutionUseCase: StartExecutionUseCase, 
+        private readonly finishServiceUseCase: FinishServiceUseCase
     ) { }
 
     @Post()
@@ -203,4 +210,86 @@ export class OrdemServicoController {
         return OrdemServicoMapper.toHttp(osAtualizada)
     }
 
+    @Patch(':id/iniciar-execucao')
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({
+        summary: 'Aprovar orçamento e iniciar execução do serviço',
+        description: 'Aprova o orçamento e altera o status da ordem de serviço para EM_EXECUCAO, permitindo o início do serviço.'
+    })
+    @ApiParam({
+        name: 'id',
+        description: 'Identificador da ordem de serviço',
+        type: Number,
+        example: 1
+    })
+    @ApiOkResponse({
+        description: 'Orçamento aprovado e execução do serviço iniciada com sucesso'
+    })
+    @ApiNotFoundResponse({
+        description: 'Ordem de serviço não encontrada'
+    })
+    @ApiBadRequestResponse({
+        description: 'A ordem de serviço não está em um status que permita iniciar a execução'
+    })
+    @ApiUnauthorizedResponse({
+        description: 'Token JWT ausente ou inválido'
+    })
+    async iniciarExecucao(
+        @Param('id', ParseIntPipe) id: number
+    ) {
+        const osAtualizada = await this.startExecutionUseCase.execute(id)
+
+        return OrdemServicoMapper.toHttp(osAtualizada)
+    }
+
+    @Patch(':id/concluir')
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({
+        summary: 'Concluir ordem de serviço',
+        description: 'Registra a solução aplicada, finaliza o serviço e altera o status da ordem de serviço para CONCLUIDA.'
+    })
+    @ApiParam({
+        name: 'id',
+        description: 'Identificador da ordem de serviço',
+        type: Number,
+        example: 1
+    })
+    @ApiBody({
+        description: 'Dados da solução aplicada durante a execução do serviço',
+        schema: {
+            type: 'object',
+            required: ['solucao_aplicada'],
+            properties: {
+                solucao_aplicada: {
+                    type: 'string',
+                    example: 'Bomba de combustível substituída e sistema testado',
+                    minLength: 5,
+                    description: 'Descrição da solução aplicada para resolver o problema'
+                }
+            }
+        }
+    })
+    @ApiOkResponse({
+        description: 'Ordem de serviço concluída com sucesso'
+    })
+    @ApiNotFoundResponse({
+        description: 'Ordem de serviço não encontrada'
+    })
+    @ApiBadRequestResponse({
+        description: 'Dados inválidos ou ordem de serviço em status incompatível com a conclusão'
+    })
+    @ApiUnauthorizedResponse({
+        description: 'Token JWT ausente ou inválido'
+    })
+    async concluirServico(
+        @Param('id', ParseIntPipe) id: number,
+        @Body(new ZodValidationPipe(finishServiceSchema)) body: FinishServiceDTO
+    ) {
+        const osConcluida = await this.finishServiceUseCase.execute(
+            id,
+            body
+        )
+
+        return OrdemServicoMapper.toHttp(osConcluida)
+    }
 }
