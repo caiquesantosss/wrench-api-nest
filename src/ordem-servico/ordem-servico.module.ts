@@ -5,6 +5,8 @@ import { OpenServiceOrderUseCase } from './application/use-cases/open-service-or
 
 import { UsuarioModule } from '../usuario/usuario.module'
 import { ClienteModule } from '../cliente/cliente.module'
+import { AddDiagnosticUseCase } from './application/use-cases/add-diagnostic-use-case'
+import { BudgetDefineUseCase } from './application/use-cases/budget-define-use-case'
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { ClienteModule } from '../cliente/cliente.module'
       useClass: PrismaOrdemServicoRepository,
     },
     OpenServiceOrderUseCase,
+    AddDiagnosticUseCase, 
+    BudgetDefineUseCase
   ],
 })
 export class OrdemServicoModule {}

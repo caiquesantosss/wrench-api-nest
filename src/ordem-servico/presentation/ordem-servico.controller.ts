@@ -3,6 +3,9 @@ import {
     Controller,
     HttpCode,
     HttpStatus,
+    Param,
+    ParseIntPipe,
+    Patch,
     Post,
     UseGuards
 } from '@nestjs/common'
@@ -14,7 +17,10 @@ import {
     ApiNotFoundResponse,
     ApiOperation,
     ApiTags,
-    ApiUnauthorizedResponse
+    ApiUnauthorizedResponse,
+    ApiParam,
+    ApiOkResponse,
+    ApiBadRequestResponse
 } from '@nestjs/swagger'
 
 import { JwtAuthGuard } from '../../usuario/shared/guards/jwt-auth-guard'
@@ -24,6 +30,10 @@ import { ZodValidationPipe } from '../../usuario/shared/pipes/zod-validation-pip
 import { OpenServiceOrderUseCase } from '../application/use-cases/open-service-order-use-case'
 import { OpenOsDTO, openOsSchema } from '../application/dtos/open-os.dto'
 import { OrdemServicoMapper } from './mappers/ordem-serico.mappers'
+import { AddDiagnosticDTO, addDiagnosticSchema } from '../application/dtos/add-diagnostic.dto'
+import { AddDiagnosticUseCase } from '../application/use-cases/add-diagnostic-use-case'
+import { BudgetDefineDTO, budgetDefineSchema } from '../application/dtos/budget-define.dto'
+import { BudgetDefineUseCase } from '../application/use-cases/budget-define-use-case'
 
 @ApiTags('Ordem de Serviço')
 @ApiBearerAuth('JWT-auth')
@@ -31,7 +41,9 @@ import { OrdemServicoMapper } from './mappers/ordem-serico.mappers'
 @Controller('ordens-servico')
 export class OrdemServicoController {
     constructor(
-        private readonly openServiceOrderUseCase: OpenServiceOrderUseCase
+        private readonly openServiceOrderUseCase: OpenServiceOrderUseCase,
+        private readonly addDiagnosticUseCase: AddDiagnosticUseCase,
+        private readonly budgetDefineUseCase: BudgetDefineUseCase
     ) { }
 
     @Post()
@@ -82,4 +94,113 @@ export class OrdemServicoController {
 
         return OrdemServicoMapper.toHttp(novaOS)
     }
+
+    @Patch(':id/diagnostico')
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({
+        summary: 'Adicionar diagnóstico à ordem de serviço',
+        description: 'Registra o diagnóstico do mecânico e avança a ordem de serviço para o status ORCAMENTO_PENDENTE.'
+    })
+    @ApiParam({
+        name: 'id',
+        description: 'Identificador da ordem de serviço',
+        type: Number,
+        example: 1
+    })
+    @ApiBody({
+        description: 'Dados do diagnóstico realizado pelo mecânico',
+        schema: {
+            type: 'object',
+            required: ['diagnostico'],
+            properties: {
+                diagnostico: {
+                    type: 'string',
+                    example: 'Necessária a substituição da bomba de combustível',
+                    minLength: 5,
+                    description: 'Descrição técnica do problema identificado'
+                }
+            }
+        }
+    })
+    @ApiOkResponse({
+        description: 'Diagnóstico registrado e ordem de serviço atualizada com sucesso'
+    })
+    @ApiNotFoundResponse({
+        description: 'Ordem de serviço não encontrada'
+    })
+    @ApiBadRequestResponse({
+        description: 'Dados inválidos ou transição de status não permitida'
+    })
+    @ApiUnauthorizedResponse({
+        description: 'Token JWT ausente ou inválido'
+    })
+    async adicionarDiagnostico(
+        @Param('id', ParseIntPipe) id: number,
+        @Body(new ZodValidationPipe(addDiagnosticSchema)) body: AddDiagnosticDTO
+    ) {
+        const osAtualizada = await this.addDiagnosticUseCase.execute(
+            id,
+            body.diagnostico
+        )
+
+        return OrdemServicoMapper.toHttp(osAtualizada)
+    }
+
+    @Patch(':id/orcamento')
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({
+        summary: 'Definir orçamento da ordem de serviço',
+        description: 'Registra os valores de mão de obra e peças e avança a ordem de serviço para AGUARDANDO_APROVACAO.'
+    })
+    @ApiParam({
+        name: 'id',
+        description: 'Identificador da ordem de serviço',
+        type: Number,
+        example: 1
+    })
+    @ApiBody({
+        description: 'Valores que compõem o orçamento da ordem de serviço',
+        schema: {
+            type: 'object',
+            required: ['valor_mao_obra', 'valor_pecas'],
+            properties: {
+                valor_mao_obra: {
+                    type: 'number',
+                    example: 250.00,
+                    minimum: 0,
+                    description: 'Valor da mão de obra'
+                },
+                valor_pecas: {
+                    type: 'number',
+                    example: 180.50,
+                    minimum: 0,
+                    description: 'Valor total das peças'
+                }
+            }
+        }
+    })
+    @ApiOkResponse({
+        description: 'Orçamento definido e ordem de serviço atualizada com sucesso'
+    })
+    @ApiNotFoundResponse({
+        description: 'Ordem de serviço não encontrada'
+    })
+    @ApiBadRequestResponse({
+        description: 'Dados inválidos ou transição de status não permitida'
+    })
+    @ApiUnauthorizedResponse({
+        description: 'Token JWT ausente ou inválido'
+    })
+    async definirOrcamento(
+        @Param('id', ParseIntPipe) id: number,
+        @Body(new ZodValidationPipe(budgetDefineSchema)) body: BudgetDefineDTO
+    ) {
+        const osAtualizada = await this.budgetDefineUseCase.execute(
+            id,
+            body
+        )
+
+        return OrdemServicoMapper.toHttp(osAtualizada)
+    }
+
 }
