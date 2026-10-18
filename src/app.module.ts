@@ -5,8 +5,9 @@ import { AppService } from './app.service.js';
 import { PrismaModule } from './prisma/prisma.module'
 import { UsuarioModule } from './usuario/usuario.module'
 import { ClienteModule } from './cliente/cliente.module';
+import { OrdemServicoModule } from './ordem-servico/ordem-servico.module'
 
-export const { ObserveModule, ObserveInstrument } = createObserveModule();
+export const { ObserveModule, ObserveInstrument } = createObserveModule()
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     PrismaModule,
     UsuarioModule,
     ClienteModule,
+    OrdemServicoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
