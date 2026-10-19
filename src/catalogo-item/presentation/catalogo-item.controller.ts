@@ -4,8 +4,12 @@ import {
     Get,
     HttpCode,
     HttpStatus,
+    Param,
+    ParseIntPipe,
+    Patch,
     Post,
-    UseGuards
+    UseGuards,
+    UsePipes
 } from '@nestjs/common'
 
 import {
@@ -15,16 +19,22 @@ import {
     ApiBody,
     ApiCreatedResponse,
     ApiBadRequestResponse,
-    ApiUnauthorizedResponse
+    ApiUnauthorizedResponse,
+    ApiResponse,
+    ApiParam
 } from '@nestjs/swagger'
 
 import { JwtAuthGuard } from '../../usuario/shared/guards/jwt-auth-guard'
 import { ZodValidationPipe } from '../../usuario/shared/pipes/zod-validation-pipe'
+
 import { CreateCatalogItemDTO, createCatalogItemSchema } from '../application/dtos/create-catalog-item.dto'
+import { UpdateCatalogItemDTO, updateCatalogItemSchema } from '../application/dtos/update-catalog-item.dto'
+
 import { CatalogItemMapper } from './mappers/catalog-items.mapper'
 
 import { CreateCatalogItemUseCase } from '../application/use-cases/create-catalog-item-use-case'
 import { ListCatalogItemUseCase } from '../application/use-cases/list-catalog-item-use-case'
+import { UpdateCatalogItemUseCase } from '../application/use-cases/update-catalog-item-use-case'
 
 @ApiTags('Catálogo de Itens')
 @ApiBearerAuth('JWT-auth')
@@ -33,7 +43,8 @@ import { ListCatalogItemUseCase } from '../application/use-cases/list-catalog-it
 export class CatalogoItemController {
     constructor(
         private readonly createCatalogItemUseCase: CreateCatalogItemUseCase,
-        private readonly listCatalogItemUseCase: ListCatalogItemUseCase
+        private readonly listCatalogItemUseCase: ListCatalogItemUseCase,
+        private readonly updateCatalogItemUseCase: UpdateCatalogItemUseCase
     ) { }
 
     @Post()
@@ -123,5 +134,56 @@ export class CatalogoItemController {
         const itens = await this.listCatalogItemUseCase.execute()
 
         return itens.map(CatalogItemMapper.toHttp)
+    }
+
+    @Patch(':id')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({
+        summary: 'Atualizar informações de um item do catálogo'
+    })
+    @ApiParam({
+        name: 'id',
+        description: 'ID do item no catálogo',
+        type: Number
+    })
+    @ApiBody({
+        description: 'Dados do item que serão atualizados',
+        schema: {
+            type: 'object',
+            properties: {
+                descricao: {
+                    type: 'string',
+                    example: 'Troca de óleo do motor'
+                },
+                unidade: {
+                    type: 'string',
+                    example: 'UN'
+                },
+                valor_unitario: {
+                    type: 'number',
+                    example: 150.50
+                }
+            },
+            example: {
+                descricao: 'Troca de óleo do motor',
+                unidade: 'UN',
+                valor_unitario: 150.50
+            }
+        }
+    })
+    @ApiResponse({ status: 200, description: 'Item atualizado com sucesso' })
+    @ApiResponse({ status: 400, description: 'Erro de validação' })
+    @ApiResponse({ status: 401, description: 'Não autenticado ou token inválido' })
+    @ApiResponse({ status: 404, description: 'Item não encontrado' })
+    async atualizar(
+        @Param('id', ParseIntPipe) id: number,
+        @Body(new ZodValidationPipe(updateCatalogItemSchema))
+        body: UpdateCatalogItemDTO
+    ) {
+        const itemAtualizado =
+            await this.updateCatalogItemUseCase.execute(id, body)
+
+        return CatalogItemMapper.toHttp(itemAtualizado)
     }
 }

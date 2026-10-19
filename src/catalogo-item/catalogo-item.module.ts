@@ -5,6 +5,7 @@ import { UsuarioModule } from '../usuario/usuario.module';
 import { PrismaCatalogItemRepository } from './infrastructure/database/PrismaCatalogItemRepository';
 import { CreateCatalogItemUseCase } from './application/use-cases/create-catalog-item-use-case';
 import { ListCatalogItemUseCase } from './application/use-cases/list-catalog-item-use-case';
+import { UpdateCatalogItemUseCase } from './application/use-cases/update-catalog-item-use-case';
 
 @Module({
   imports: [UsuarioModule],
@@ -15,7 +16,8 @@ import { ListCatalogItemUseCase } from './application/use-cases/list-catalog-ite
       useClass: PrismaCatalogItemRepository,
     },
     CreateCatalogItemUseCase,
-    ListCatalogItemUseCase
+    ListCatalogItemUseCase,
+    UpdateCatalogItemUseCase
   ],
   exports: ['CatalogItemRepository'], 
 })

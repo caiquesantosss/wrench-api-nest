@@ -5,6 +5,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
 import { AppModule } from './app.module'
 import { env } from './env/env'
 
+
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
@@ -26,7 +27,7 @@ async function bootstrap() {
         description: 'Introduza o token JWT gerado no endpoint de login',
         in: 'header',
       },
-      'JWT-auth', 
+      'JWT-auth',
     )
     .build()
 

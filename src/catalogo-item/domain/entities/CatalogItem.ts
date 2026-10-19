@@ -90,6 +90,19 @@ export class CatalogItem {
         this._valor_unitario = newValue
     }
 
+    public updateBasicDatas(descricao: string, unidade: string): void {
+        if (!descricao || descricao.trim().length < 3) {
+            throw new Error('A descrição deve ter pelo menos 3 caracteres')
+        }
+
+        if (!unidade || unidade.trim().length === 0) {
+            throw new Error('A unidade de medida é obrigatória.')
+        }
+
+        this._descricao = descricao
+        this._unidade = unidade
+    }
+
     public addInventory(quantity: number): void {
         if (this._tipo_item === 'SERVICO') {
             throw new Error('Não é possível adicionar estoque de um serviço')
