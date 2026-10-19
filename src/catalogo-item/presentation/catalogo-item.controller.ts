@@ -1,6 +1,7 @@
 import {
     Body,
     Controller,
+    Get,
     HttpCode,
     HttpStatus,
     Post,
@@ -18,10 +19,12 @@ import {
 } from '@nestjs/swagger'
 
 import { JwtAuthGuard } from '../../usuario/shared/guards/jwt-auth-guard'
-import { CreateCatalogItemUseCase } from '../application/use-cases/create-catalog-item-use-case'
 import { ZodValidationPipe } from '../../usuario/shared/pipes/zod-validation-pipe'
 import { CreateCatalogItemDTO, createCatalogItemSchema } from '../application/dtos/create-catalog-item.dto'
 import { CatalogItemMapper } from './mappers/catalog-items.mapper'
+
+import { CreateCatalogItemUseCase } from '../application/use-cases/create-catalog-item-use-case'
+import { ListCatalogItemUseCase } from '../application/use-cases/list-catalog-item-use-case'
 
 @ApiTags('Catálogo de Itens')
 @ApiBearerAuth('JWT-auth')
@@ -29,11 +32,14 @@ import { CatalogItemMapper } from './mappers/catalog-items.mapper'
 @Controller('catalogo-itens')
 export class CatalogoItemController {
     constructor(
-        private readonly cadastrarItemUseCase: CreateCatalogItemUseCase
+        private readonly createCatalogItemUseCase: CreateCatalogItemUseCase,
+        private readonly listCatalogItemUseCase: ListCatalogItemUseCase
     ) { }
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth('JWT-auth')
     @ApiOperation({
         summary: 'Cadastrar item no catálogo',
         description: 'Cadastra um novo produto ou serviço no catálogo de itens.'
@@ -102,8 +108,20 @@ export class CatalogoItemController {
         @Body(new ZodValidationPipe(createCatalogItemSchema))
         body: CreateCatalogItemDTO
     ) {
-        const novoItem = await this.cadastrarItemUseCase.execute(body)
+        const novoItem = await this.createCatalogItemUseCase.execute(body)
 
         return CatalogItemMapper.toHttp(novoItem)
+    }
+
+    @Get()
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({
+        summary: 'Listar itens ativos do catálogo'
+    })
+    async listarAtivos() {
+        const itens = await this.listCatalogItemUseCase.execute()
+
+        return itens.map(CatalogItemMapper.toHttp)
     }
 }
