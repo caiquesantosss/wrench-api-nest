@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module'
 import { UsuarioModule } from './usuario/usuario.module'
 import { ClienteModule } from './cliente/cliente.module';
 import { OrdemServicoModule } from './ordem-servico/ordem-servico.module'
+import { CatalogoItemModule } from './catalogo-item/catalogo-item.module';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule()
 
@@ -20,6 +21,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule()
     UsuarioModule,
     ClienteModule,
     OrdemServicoModule,
+    CatalogoItemModule,
   ],
   controllers: [AppController],
   providers: [AppService],
