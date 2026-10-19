@@ -29,12 +29,14 @@ import { ZodValidationPipe } from '../../usuario/shared/pipes/zod-validation-pip
 
 import { CreateCatalogItemDTO, createCatalogItemSchema } from '../application/dtos/create-catalog-item.dto'
 import { UpdateCatalogItemDTO, updateCatalogItemSchema } from '../application/dtos/update-catalog-item.dto'
+import { UpdateStatusCatalogDTO, updateStatusCatalogItemSchema } from '../application/dtos/update-status-catalog-item.dto'
 
 import { CatalogItemMapper } from './mappers/catalog-items.mapper'
 
 import { CreateCatalogItemUseCase } from '../application/use-cases/create-catalog-item-use-case'
 import { ListCatalogItemUseCase } from '../application/use-cases/list-catalog-item-use-case'
 import { UpdateCatalogItemUseCase } from '../application/use-cases/update-catalog-item-use-case'
+import { UpdateStatusCatalogItem } from '../application/use-cases/update-status-catalog-item-use-case'
 
 @ApiTags('Catálogo de Itens')
 @ApiBearerAuth('JWT-auth')
@@ -44,7 +46,8 @@ export class CatalogoItemController {
     constructor(
         private readonly createCatalogItemUseCase: CreateCatalogItemUseCase,
         private readonly listCatalogItemUseCase: ListCatalogItemUseCase,
-        private readonly updateCatalogItemUseCase: UpdateCatalogItemUseCase
+        private readonly updateCatalogItemUseCase: UpdateCatalogItemUseCase, 
+        private readonly updateStatusCatalogItem: UpdateStatusCatalogItem
     ) { }
 
     @Post()
@@ -183,6 +186,51 @@ export class CatalogoItemController {
     ) {
         const itemAtualizado =
             await this.updateCatalogItemUseCase.execute(id, body)
+
+        return CatalogItemMapper.toHttp(itemAtualizado)
+    }
+
+    @Patch(':id/status')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({
+        summary: 'Ativar ou desativar um item do catálogo (Soft Delete)'
+    })
+    @ApiParam({
+        name: 'id',
+        description: 'ID do item no catálogo',
+        type: Number
+    })
+    @ApiBody({
+        description: 'Novo status do item',
+        schema: {
+            type: 'object',
+            required: ['ativo'],
+            properties: {
+                ativo: {
+                    type: 'boolean',
+                    example: false,
+                    description: 'Define se o item está ativo'
+                }
+            },
+            example: {
+                ativo: false
+            }
+        }
+    })
+    @ApiResponse({ status: 200, description: 'Status do item alterado com sucesso' })
+    @ApiResponse({ status: 400, description: 'Dados inválidos' })
+    @ApiResponse({ status: 401, description: 'Não autenticado ou token inválido' })
+    @ApiResponse({ status: 404, description: 'Item não encontrado' })
+    async alterarStatus(
+        @Param('id', ParseIntPipe) id: number,
+        @Body(new ZodValidationPipe(updateStatusCatalogItemSchema))
+        body: UpdateStatusCatalogDTO
+    ) {
+        const itemAtualizado = await this.updateStatusCatalogItem.execute(
+            id,
+            body.ativo
+        )
 
         return CatalogItemMapper.toHttp(itemAtualizado)
     }

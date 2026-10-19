@@ -6,6 +6,7 @@ import { PrismaCatalogItemRepository } from './infrastructure/database/PrismaCat
 import { CreateCatalogItemUseCase } from './application/use-cases/create-catalog-item-use-case';
 import { ListCatalogItemUseCase } from './application/use-cases/list-catalog-item-use-case';
 import { UpdateCatalogItemUseCase } from './application/use-cases/update-catalog-item-use-case';
+import { UpdateStatusCatalogItem } from './application/use-cases/update-status-catalog-item-use-case';
 
 @Module({
   imports: [UsuarioModule],
@@ -17,8 +18,9 @@ import { UpdateCatalogItemUseCase } from './application/use-cases/update-catalog
     },
     CreateCatalogItemUseCase,
     ListCatalogItemUseCase,
-    UpdateCatalogItemUseCase
+    UpdateCatalogItemUseCase,
+    UpdateStatusCatalogItem
   ],
-  exports: ['CatalogItemRepository'], 
+  exports: ['CatalogItemRepository'],
 })
-export class CatalogoItemModule {}
+export class CatalogoItemModule { }
