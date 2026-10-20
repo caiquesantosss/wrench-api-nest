@@ -7,6 +7,8 @@ import { CreateCatalogItemUseCase } from './application/use-cases/create-catalog
 import { ListCatalogItemUseCase } from './application/use-cases/list-catalog-item-use-case';
 import { UpdateCatalogItemUseCase } from './application/use-cases/update-catalog-item-use-case';
 import { UpdateStatusCatalogItem } from './application/use-cases/update-status-catalog-item-use-case';
+import { AddStockUseCase } from './application/use-cases/add-stock-use-case';
+import { RemoveStockUseCase } from './application/use-cases/remove-stock-use-case';
 
 @Module({
   imports: [UsuarioModule],
@@ -19,7 +21,9 @@ import { UpdateStatusCatalogItem } from './application/use-cases/update-status-c
     CreateCatalogItemUseCase,
     ListCatalogItemUseCase,
     UpdateCatalogItemUseCase,
-    UpdateStatusCatalogItem
+    UpdateStatusCatalogItem, 
+    AddStockUseCase, 
+    RemoveStockUseCase
   ],
   exports: ['CatalogItemRepository'],
 })

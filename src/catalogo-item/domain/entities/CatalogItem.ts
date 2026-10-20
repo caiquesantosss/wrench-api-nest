@@ -103,7 +103,7 @@ export class CatalogItem {
         this._unidade = unidade
     }
 
-    public addInventory(quantity: number): void {
+    public addStock(quantity: number): void {
         if (this._tipo_item === 'SERVICO') {
             throw new Error('Não é possível adicionar estoque de um serviço')
         }
@@ -115,7 +115,7 @@ export class CatalogItem {
         this._estoque_atual += quantity
     }
 
-    public removeInventory(quantity: number): void {
+    public removeStock(quantity: number): void {
         if (this._tipo_item === 'SERVICO') {
             throw new Error('Não é possível remover estoque de um serviço')
         }

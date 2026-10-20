@@ -30,6 +30,7 @@ import { ZodValidationPipe } from '../../usuario/shared/pipes/zod-validation-pip
 import { CreateCatalogItemDTO, createCatalogItemSchema } from '../application/dtos/create-catalog-item.dto'
 import { UpdateCatalogItemDTO, updateCatalogItemSchema } from '../application/dtos/update-catalog-item.dto'
 import { UpdateStatusCatalogDTO, updateStatusCatalogItemSchema } from '../application/dtos/update-status-catalog-item.dto'
+import { StockMovementDTO, stockMovementSchema } from '../application/dtos/stock-movement.dto'
 
 import { CatalogItemMapper } from './mappers/catalog-items.mapper'
 
@@ -37,6 +38,8 @@ import { CreateCatalogItemUseCase } from '../application/use-cases/create-catalo
 import { ListCatalogItemUseCase } from '../application/use-cases/list-catalog-item-use-case'
 import { UpdateCatalogItemUseCase } from '../application/use-cases/update-catalog-item-use-case'
 import { UpdateStatusCatalogItem } from '../application/use-cases/update-status-catalog-item-use-case'
+import { AddStockUseCase } from '../application/use-cases/add-stock-use-case'
+import { RemoveStockUseCase } from '../application/use-cases/remove-stock-use-case'
 
 @ApiTags('Catálogo de Itens')
 @ApiBearerAuth('JWT-auth')
@@ -46,8 +49,10 @@ export class CatalogoItemController {
     constructor(
         private readonly createCatalogItemUseCase: CreateCatalogItemUseCase,
         private readonly listCatalogItemUseCase: ListCatalogItemUseCase,
-        private readonly updateCatalogItemUseCase: UpdateCatalogItemUseCase, 
-        private readonly updateStatusCatalogItem: UpdateStatusCatalogItem
+        private readonly updateCatalogItemUseCase: UpdateCatalogItemUseCase,
+        private readonly updateStatusCatalogItem: UpdateStatusCatalogItem,
+        private readonly addStockUseCase: AddStockUseCase,
+        private readonly removeStockUseCase: RemoveStockUseCase
     ) { }
 
     @Post()
@@ -233,5 +238,97 @@ export class CatalogoItemController {
         )
 
         return CatalogItemMapper.toHttp(itemAtualizado)
+    }
+
+    @Patch(':id/estoque/entrada')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({
+        summary: 'Adicionar quantidade ao estoque de um produto'
+    })
+    @ApiParam({
+        name: 'id',
+        description: 'ID do produto',
+        type: Number
+    })
+    @ApiBody({
+        description: 'Quantidade a adicionar ao estoque',
+        schema: {
+            type: 'object',
+            required: ['quantidade'],
+            properties: {
+                quantidade: {
+                    type: 'number',
+                    example: 10,
+                    minimum: 0.01,
+                    description: 'Quantidade que será adicionada'
+                }
+            },
+            example: {
+                quantidade: 10
+            }
+        }
+    })
+    @ApiResponse({ status: 200, description: 'Entrada de estoque registrada com sucesso' })
+    @ApiResponse({ status: 400, description: 'Quantidade inválida' })
+    @ApiResponse({ status: 401, description: 'Não autenticado ou token inválido' })
+    @ApiResponse({ status: 404, description: 'Produto não encontrado' })
+    async entradaEstoque(
+        @Param('id', ParseIntPipe) id: number,
+        @Body(new ZodValidationPipe(stockMovementSchema))
+        body: StockMovementDTO
+    ) {
+        const item = await this.addStockUseCase.execute(
+            id,
+            body.quantidade
+        )
+
+        return CatalogItemMapper.toHttp(item)
+    }
+
+    @Patch(':id/estoque/saida')
+    @UseGuards(JwtAuthGuard)
+    @ApiBearerAuth('JWT-auth')
+    @ApiOperation({
+        summary: 'Remover quantidade do estoque de um produto'
+    })
+    @ApiParam({
+        name: 'id',
+        description: 'ID do produto',
+        type: Number
+    })
+    @ApiBody({
+        description: 'Quantidade a retirar do estoque',
+        schema: {
+            type: 'object',
+            required: ['quantidade'],
+            properties: {
+                quantidade: {
+                    type: 'number',
+                    example: 2,
+                    minimum: 0.01,
+                    description: 'Quantidade que será removida'
+                }
+            },
+            example: {
+                quantidade: 2
+            }
+        }
+    })
+    @ApiResponse({ status: 200, description: 'Saída de estoque registrada com sucesso' })
+    @ApiResponse({ status: 400, description: 'Quantidade inválida ou estoque insuficiente' })
+    @ApiResponse({ status: 401, description: 'Não autenticado ou token inválido' })
+    @ApiResponse({ status: 404, description: 'Produto não encontrado' })
+    async saidaEstoque(
+        @Param('id', ParseIntPipe) id: number,
+        @Body(new ZodValidationPipe(stockMovementSchema))
+        body: StockMovementDTO
+    ) {
+        const item = await this.removeStockUseCase.execute(
+            id,
+            body.quantidade
+        )
+
+        return CatalogItemMapper.toHttp(item)
     }
 }
