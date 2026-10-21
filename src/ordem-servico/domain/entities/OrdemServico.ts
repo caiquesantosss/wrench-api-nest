@@ -1,4 +1,12 @@
-export type StatusOS = 'ABERTA' | 'ORCAMENTO_PENDENTE' | 'AGUARDANDO_APROVACAO' | 'EM_EXECUCAO' | 'CONCLUIDA' | 'CANCELADA'
+import { ItemOS } from './ItemOS'
+
+export type StatusOS =
+    | 'ABERTA'
+    | 'ORCAMENTO_PENDENTE'
+    | 'AGUARDANDO_APROVACAO'
+    | 'EM_EXECUCAO'
+    | 'CONCLUIDA'
+    | 'CANCELADA'
 
 export class OrdemServico {
     private _id_ordem_servico?: number
@@ -16,6 +24,7 @@ export class OrdemServico {
     private _data_previsao?: Date
     private _data_conclusao?: Date
     private _data_atualizacao: Date
+    private _itens: ItemOS[] = []
 
     private constructor(
         id_cliente: number,
@@ -116,27 +125,102 @@ export class OrdemServico {
 
     private checkIfFrozen(): void {
         if (this._status === 'CONCLUIDA' || this._status === 'CANCELADA') {
-            throw new Error('Não é possível alterar uma OS já Concluída ou Cancelada.')
+            throw new Error(
+                'Não é possível alterar uma OS já Concluída ou Cancelada.'
+            )
         }
+    }
+
+    public addItem(
+        idCatalogoItem: number,
+        tipoItem: 'PRODUTO' | 'SERVICO',
+        quantidade: number,
+        precoUnitario: number
+    ): void {
+        this.checkIfFrozen()
+
+        const itemExistente = this._itens.find(
+            i => i.id_catalogo_item === idCatalogoItem
+        )
+
+        if (itemExistente) {
+            throw new Error(
+                'Este item já foi adicionado. Remova-o e adicione novamente com a nova quantidade.'
+            )
+        }
+
+        const novoItem = ItemOS.create(
+            idCatalogoItem,
+            tipoItem,
+            quantidade,
+            precoUnitario
+        )
+
+        this._itens.push(novoItem)
+        this.recalculateTotals()
+    }
+
+    public removeItem(idCatalogoItem: number): void {
+        this.checkIfFrozen()
+
+        const tamanhoAnterior = this._itens.length
+
+        this._itens = this._itens.filter(
+            i => i.id_catalogo_item !== idCatalogoItem
+        )
+
+        if (this._itens.length === tamanhoAnterior) {
+            throw new Error(
+                'O item não foi encontrado na Ordem de Serviço.'
+            )
+        }
+
+        this.recalculateTotals()
+    }
+
+    public loadItemsFromDatabase(itens: ItemOS[]): void {
+        this._itens = itens
+    }
+
+    private recalculateTotals(): void {
+        const itensValidos = this._itens.filter(
+            item => item.status_aprovacao !== 'REJEITADO'
+        )
+
+        this._valor_pecas = itensValidos
+            .filter(item => item.tipo_item === 'PRODUTO')
+            .reduce((acc, item) => acc + item.valor_total, 0)
+
+        this._valor_mao_obra = itensValidos
+            .filter(item => item.tipo_item === 'SERVICO')
+            .reduce((acc, item) => acc + item.valor_total, 0)
+
+        this._valor_total = this._valor_pecas + this._valor_mao_obra
+        this.updateDate()
     }
 
     public setDiagnosis(diagnostico: string): void {
         this.checkIfFrozen()
+
         this._diagnostico = diagnostico
         this._status = 'ORCAMENTO_PENDENTE'
         this.updateDate()
     }
 
-    public setBudget(valorPecas: number, valorMaoObra: number, dataPrevisao?: Date): void {
+    public setBudget(dataPrevisao?: Date): void {
         this.checkIfFrozen()
 
         if (this._status !== 'ORCAMENTO_PENDENTE') {
-            throw new Error('Apenas OS em ORCAMENTO_PENDENTE pode receber valores de orçamento.')
+            throw new Error(
+                'Apenas OS em ORCAMENTO_PENDENTE pode receber orçamento.'
+            )
         }
 
-        this._valor_pecas = valorPecas
-        this._valor_mao_obra = valorMaoObra
-        this._valor_total = valorPecas + valorMaoObra
+        if (this._itens.length === 0) {
+            throw new Error(
+                'É necessário adicionar pelo menos um item (peça ou serviço) antes de fechar o orçamento.'
+            )
+        }
 
         if (dataPrevisao) {
             this._data_previsao = dataPrevisao
@@ -150,7 +234,9 @@ export class OrdemServico {
         this.checkIfFrozen()
 
         if (this._status !== 'AGUARDANDO_APROVACAO') {
-            throw new Error('O orçamento deve ser aprovado antes de iniciar a execução.')
+            throw new Error(
+                'O orçamento deve ser aprovado antes de iniciar a execução.'
+            )
         }
 
         this._status = 'EM_EXECUCAO'
@@ -159,7 +245,9 @@ export class OrdemServico {
 
     public completeService(solucaoAplicada: string): void {
         if (this._status !== 'EM_EXECUCAO') {
-            throw new Error('Apenas uma OS EM_EXECUCAO pode ser concluída.')
+            throw new Error(
+                'Apenas uma OS EM_EXECUCAO pode ser concluída.'
+            )
         }
 
         this._solucao_aplicada = solucaoAplicada
@@ -168,19 +256,67 @@ export class OrdemServico {
         this.updateDate()
     }
 
-    get id_ordem_servico() { return this._id_ordem_servico }
-    get id_cliente() { return this._id_cliente }
-    get id_ativo() { return this._id_ativo }
-    get id_usuario() { return this._id_usuario }
-    get status() { return this._status }
-    get descricao_problema() { return this._descricao_problema }
-    get diagnostico() { return this._diagnostico }
-    get solucao_aplicada() { return this._solucao_aplicada }
-    get valor_mao_obra() { return this._valor_mao_obra }
-    get valor_pecas() { return this._valor_pecas }
-    get valor_total() { return this._valor_total }
-    get data_abertura() { return this._data_abertura }
-    get data_previsao() { return this._data_previsao }
-    get data_conclusao() { return this._data_conclusao }
-    get data_atualizacao() { return this._data_atualizacao }
+    get id_ordem_servico() {
+        return this._id_ordem_servico
+    }
+
+    get id_cliente() {
+        return this._id_cliente
+    }
+
+    get id_ativo() {
+        return this._id_ativo
+    }
+
+    get id_usuario() {
+        return this._id_usuario
+    }
+
+    get status() {
+        return this._status
+    }
+
+    get descricao_problema() {
+        return this._descricao_problema
+    }
+
+    get diagnostico() {
+        return this._diagnostico
+    }
+
+    get solucao_aplicada() {
+        return this._solucao_aplicada
+    }
+
+    get valor_mao_obra() {
+        return this._valor_mao_obra
+    }
+
+    get valor_pecas() {
+        return this._valor_pecas
+    }
+
+    get valor_total() {
+        return this._valor_total
+    }
+
+    get data_abertura() {
+        return this._data_abertura
+    }
+
+    get data_previsao() {
+        return this._data_previsao
+    }
+
+    get data_conclusao() {
+        return this._data_conclusao
+    }
+
+    get data_atualizacao() {
+        return this._data_atualizacao
+    }
+
+    get items(): ItemOS[] {
+        return [...this._itens]
+    }
 }
