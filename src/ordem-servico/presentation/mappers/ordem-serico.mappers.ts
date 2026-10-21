@@ -1,4 +1,4 @@
-import { OrdemServico } from '../../domain/entities/OrdemServico'
+import { OrdemServico } from '../../domain/entities/OrdemServico';
 
 export class OrdemServicoMapper {
   static toHttp(os: OrdemServico) {
@@ -18,6 +18,18 @@ export class OrdemServicoMapper {
       data_previsao: os.data_previsao ?? null,
       data_conclusao: os.data_conclusao ?? null,
       data_atualizacao: os.data_atualizacao,
+
+      itens: os.items.map(item => ({
+        id_item_os: item.id_item_os,
+        id_catalogo_item: item.id_catalogo_item,
+        tipo_item: item.tipo_item,
+        quantidade: item.quantidade,
+        valor_unitario: item.valor_unitario,
+        valor_total: item.valor_total,
+        status_aprovacao: item.status_aprovacao ?? null,
+        baixa_estoque: item.baixa_estoque,
+        data_cadastro: item.data_cadastro,
+      })),
     };
   }
 }

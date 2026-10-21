@@ -7,7 +7,8 @@ import {
     ParseIntPipe,
     Patch,
     Post,
-    UseGuards
+    UseGuards,
+    UsePipes
 } from '@nestjs/common'
 
 import {
@@ -31,6 +32,7 @@ import { OpenOsDTO, openOsSchema } from '../application/dtos/open-os.dto'
 import { AddDiagnosticDTO, addDiagnosticSchema } from '../application/dtos/add-diagnostic.dto'
 import { BudgetDefineDTO, budgetDefineSchema } from '../application/dtos/budget-define.dto'
 import { FinishServiceDTO, finishServiceSchema } from '../application/dtos/finish-service.dto'
+import { AddItemOsDTO, addItemOsSchema } from '../application/dtos/add-item-os.dto'
 
 import { OrdemServicoMapper } from './mappers/ordem-serico.mappers'
 
@@ -39,6 +41,7 @@ import { AddDiagnosticUseCase } from '../application/use-cases/add-diagnostic-us
 import { BudgetDefineUseCase } from '../application/use-cases/budget-define-use-case'
 import { StartExecutionUseCase } from '../application/use-cases/start-execution-use-case'
 import { FinishServiceUseCase } from '../application/use-cases/finish-service-use-case'
+import { AddItemOsUseCase } from '../application/use-cases/add-item-os-use-case'
 
 @ApiTags('Ordem de Serviço')
 @ApiBearerAuth('JWT-auth')
@@ -49,8 +52,9 @@ export class OrdemServicoController {
         private readonly openServiceOrderUseCase: OpenServiceOrderUseCase,
         private readonly addDiagnosticUseCase: AddDiagnosticUseCase,
         private readonly budgetDefineUseCase: BudgetDefineUseCase,
-        private readonly startExecutionUseCase: StartExecutionUseCase, 
-        private readonly finishServiceUseCase: FinishServiceUseCase
+        private readonly startExecutionUseCase: StartExecutionUseCase,
+        private readonly finishServiceUseCase: FinishServiceUseCase,
+        private readonly addItemOsUseCase: AddItemOsUseCase
     ) { }
 
     @Post()
@@ -291,5 +295,18 @@ export class OrdemServicoController {
         )
 
         return OrdemServicoMapper.toHttp(osConcluida)
+    }
+
+    @Post(':id/itens')
+    @ApiOperation({ summary: 'Adiciona uma peça ou serviço à Ordem de Serviço' })
+    @ApiParam({ name: 'id', description: 'ID da Ordem de Serviço' })
+    @UsePipes(new ZodValidationPipe(addItemOsSchema))
+    async adicionarItem(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() body: AddItemOsDTO
+    ) {
+        const osAtualizada = await this.addItemOsUseCase.execute(id, body)
+
+        return OrdemServicoMapper.toHttp(osAtualizada)
     }
 }

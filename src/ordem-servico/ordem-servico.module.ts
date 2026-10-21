@@ -9,11 +9,14 @@ import { AddDiagnosticUseCase } from './application/use-cases/add-diagnostic-use
 import { BudgetDefineUseCase } from './application/use-cases/budget-define-use-case'
 import { StartExecutionUseCase } from './application/use-cases/start-execution-use-case'
 import { FinishServiceUseCase } from './application/use-cases/finish-service-use-case'
+import { AddItemOsUseCase } from './application/use-cases/add-item-os-use-case'
+import { CatalogoItemModule } from '../catalogo-item/catalogo-item.module'
 
 @Module({
   imports: [
     UsuarioModule, 
     ClienteModule, 
+    CatalogoItemModule
   ],
   controllers: [OrdemServicoController],
   providers: [
@@ -25,7 +28,8 @@ import { FinishServiceUseCase } from './application/use-cases/finish-service-use
     AddDiagnosticUseCase, 
     BudgetDefineUseCase, 
     StartExecutionUseCase, 
-    FinishServiceUseCase
+    FinishServiceUseCase, 
+    AddItemOsUseCase
   ],
 })
 export class OrdemServicoModule {}

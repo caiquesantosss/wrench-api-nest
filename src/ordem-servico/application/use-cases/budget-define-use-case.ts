@@ -19,16 +19,13 @@ export class BudgetDefineUseCase {
             )
         }
 
-        let dataPrevista: Date | undefined 
+        let dataPrevista: Date | undefined
         if (data.data_previsao) {
-            dataPrevista = new Date(data.data_previsao) 
+            dataPrevista = new Date(data.data_previsao)
         }
 
-        os.setBudget(
-            data.valor_pecas, 
-            data.valor_mao_obra, 
-            dataPrevista
-        )
+        os.setBudget(dataPrevista)
+
 
         return await this.osRepository.save(os)
     }
