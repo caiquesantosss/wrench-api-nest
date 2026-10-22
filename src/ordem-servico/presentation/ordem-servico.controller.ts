@@ -43,6 +43,7 @@ import { StartExecutionUseCase } from '../application/use-cases/start-execution-
 import { FinishServiceUseCase } from '../application/use-cases/finish-service-use-case'
 import { AddItemOsUseCase } from '../application/use-cases/add-item-os-use-case'
 import { RemoveItemOsUseCase } from '../application/use-cases/remove-item-os-use-case'
+import { CancelItemOsUseCase } from '../application/use-cases/cancel-item-os-use-case'
 
 @ApiTags('Ordem de Serviço')
 @ApiBearerAuth('JWT-auth')
@@ -56,7 +57,8 @@ export class OrdemServicoController {
         private readonly startExecutionUseCase: StartExecutionUseCase,
         private readonly finishServiceUseCase: FinishServiceUseCase,
         private readonly addItemOsUseCase: AddItemOsUseCase,
-        private readonly removeItemOsUseCase: RemoveItemOsUseCase
+        private readonly removeItemOsUseCase: RemoveItemOsUseCase, 
+        private readonly cancelItemOsUseCase: CancelItemOsUseCase
     ) { }
 
     @Post()
@@ -352,9 +354,18 @@ export class OrdemServicoController {
         @Param('id', ParseIntPipe) serviceOrderId: number,
         @Param('idItem', ParseIntPipe) catalogItemId: number
     ) {
-        const serviceOrderAtualizada = await this.removeItemOsUseCase.execute(serviceOrderId, catalogItemId);
+        const serviceOrderAtualizada = await this.removeItemOsUseCase.execute(serviceOrderId, catalogItemId)
 
 
-        return OrdemServicoMapper.toHttp(serviceOrderAtualizada);
+        return OrdemServicoMapper.toHttp(serviceOrderAtualizada)
+    }
+
+    @Patch(':id/cancelar')
+    @ApiOperation({ summary: 'Cancela a Ordem de Serviço (congelando-a)' })
+    @ApiParam({ name: 'id', description: 'ID da Ordem de Serviço' })
+    async cancelar(@Param('id', ParseIntPipe) id: number) {
+        const osCancelada = await this.cancelItemOsUseCase.execute(id)
+
+        return OrdemServicoMapper.toHttp(osCancelada)
     }
 }

@@ -230,6 +230,13 @@ export class OrdemServico {
         this.updateDate()
     }
 
+    public cancelItem(): void {
+        this.checkIfFrozen() 
+
+        this._status = 'CANCELADA'
+        this.updateDate()
+    }
+
     public startExecution(): void {
         this.checkIfFrozen()
 

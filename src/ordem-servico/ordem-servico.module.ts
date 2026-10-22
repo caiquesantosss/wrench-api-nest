@@ -12,6 +12,7 @@ import { FinishServiceUseCase } from './application/use-cases/finish-service-use
 import { AddItemOsUseCase } from './application/use-cases/add-item-os-use-case'
 import { CatalogoItemModule } from '../catalogo-item/catalogo-item.module'
 import { RemoveItemOsUseCase } from './application/use-cases/remove-item-os-use-case'
+import { CancelItemOsUseCase } from './application/use-cases/cancel-item-os-use-case'
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { RemoveItemOsUseCase } from './application/use-cases/remove-item-os-use-
     StartExecutionUseCase, 
     FinishServiceUseCase, 
     AddItemOsUseCase,
-    RemoveItemOsUseCase
+    RemoveItemOsUseCase, 
+    CancelItemOsUseCase
   ],
 })
 export class OrdemServicoModule {}
