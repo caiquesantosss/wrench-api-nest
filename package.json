@@ -21,7 +21,6 @@
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
     "postinstall": "prisma skills sync || exit 0",
     "clean-module": "node -e \"const m = process.argv[1]; require('child_process').execSync('npx nest g module ' + m + ' && npx nest g controller ' + m + '/presentation/' + m + ' --flat', {stdio:'inherit'}); ['domain/entities', 'domain/repositories', 'application/use-cases', 'application/dtos', 'infrastructure/database'].forEach(d => require('fs').mkdirSync('src/' + m + '/' + d, {recursive:true}));\""
-    
   },
   "dependencies": {
     "@fastify/static": "^10.1.6",
@@ -35,6 +34,8 @@
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
     "bcryptjs": "^3.0.3",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
     "pg": "^8.23.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",

@@ -21,6 +21,7 @@ import {
     ApiUnauthorizedResponse,
     ApiParam,
     ApiOkResponse,
+    ApiResponse,
     ApiBadRequestResponse,
 } from '@nestjs/swagger'
 
@@ -33,6 +34,7 @@ import { AddDiagnosticDTO, addDiagnosticSchema } from '../application/dtos/add-d
 import { BudgetDefineDTO, budgetDefineSchema } from '../application/dtos/budget-define.dto'
 import { FinishServiceDTO, finishServiceSchema } from '../application/dtos/finish-service.dto'
 import { AddItemOsDTO, addItemOsSchema } from '../application/dtos/add-item-os.dto'
+import { CompleteServiceOrderDto } from '../application/dtos/complete-service.dto'
 
 import { OrdemServicoMapper } from './mappers/ordem-serico.mappers'
 
@@ -44,6 +46,7 @@ import { FinishServiceUseCase } from '../application/use-cases/finish-service-us
 import { AddItemOsUseCase } from '../application/use-cases/add-item-os-use-case'
 import { RemoveItemOsUseCase } from '../application/use-cases/remove-item-os-use-case'
 import { CancelItemOsUseCase } from '../application/use-cases/cancel-item-os-use-case'
+import { CompleteServiceOrderUseCase } from '../application/use-cases/complete-service-order-use-case'
 
 @ApiTags('Ordem de Serviço')
 @ApiBearerAuth('JWT-auth')
@@ -57,8 +60,9 @@ export class OrdemServicoController {
         private readonly startExecutionUseCase: StartExecutionUseCase,
         private readonly finishServiceUseCase: FinishServiceUseCase,
         private readonly addItemOsUseCase: AddItemOsUseCase,
-        private readonly removeItemOsUseCase: RemoveItemOsUseCase, 
-        private readonly cancelItemOsUseCase: CancelItemOsUseCase
+        private readonly removeItemOsUseCase: RemoveItemOsUseCase,
+        private readonly cancelItemOsUseCase: CancelItemOsUseCase, 
+        private readonly completeServiceOrderUseCase: CompleteServiceOrderUseCase
     ) { }
 
     @Post()
@@ -250,33 +254,7 @@ export class OrdemServicoController {
         return OrdemServicoMapper.toHttp(osAtualizada)
     }
 
-    @Patch(':id/concluir')
-    @ApiBearerAuth('JWT-auth')
-    @ApiOperation({
-        summary: 'Concluir ordem de serviço',
-        description: 'Registra a solução aplicada, finaliza o serviço e altera o status da ordem de serviço para CONCLUIDA.'
-    })
-    @ApiParam({
-        name: 'id',
-        description: 'Identificador da ordem de serviço',
-        type: Number,
-        example: 1
-    })
-    @ApiBody({
-        description: 'Dados da solução aplicada durante a execução do serviço',
-        schema: {
-            type: 'object',
-            required: ['solucao_aplicada'],
-            properties: {
-                solucao_aplicada: {
-                    type: 'string',
-                    example: 'Bomba de combustível substituída e sistema testado',
-                    minLength: 5,
-                    description: 'Descrição da solução aplicada para resolver o problema'
-                }
-            }
-        }
-    })
+
     @ApiOkResponse({
         description: 'Ordem de serviço concluída com sucesso'
     })
@@ -367,5 +345,45 @@ export class OrdemServicoController {
         const osCancelada = await this.cancelItemOsUseCase.execute(id)
 
         return OrdemServicoMapper.toHttp(osCancelada)
+    }
+
+    @Post(':id/concluir')
+    @ApiOperation({
+        summary: 'Concluir ordem de serviço',
+        description:
+            'Registra a solução aplicada, conclui a OS e realiza a baixa de estoque dos produtos elegíveis.',
+    })
+    @ApiParam({
+        name: 'id',
+        description: 'ID da ordem de serviço',
+        type: Number,
+        example: 1,
+    })
+    @ApiBody({
+        type: CompleteServiceOrderDto,
+    })
+    @ApiResponse({
+        status: 201,
+        description: 'Ordem de serviço concluída com sucesso.',
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'ID inválido ou dados da requisição inválidos.',
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'Ordem de serviço ou produto não encontrado.',
+    })
+    async concluirOs(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() body: CompleteServiceOrderDto,
+    ) {
+        const serviceOrder =
+            await this.completeServiceOrderUseCase.execute(
+                id,
+                body.appliedSolution,
+            );
+
+        return OrdemServicoMapper.toHttp(serviceOrder);
     }
 }
