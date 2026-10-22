@@ -42,8 +42,8 @@ export class ClienteController {
     ) { }
 
     @Post()
-    @Roles('ATENDENTE')
-    @UseGuards(RoleGuard)
+    /* @Roles('ATENDENTE')
+    @UseGuards(RoleGuard) */
     @ApiOperation({
         summary: 'Cadastrar um novo cliente',
     })
@@ -96,8 +96,8 @@ export class ClienteController {
     }
 
     @Post('ativos')
-    @Roles('ATENDENTE')
-    @UseGuards(RoleGuard)
+    /* @Roles('ATENDENTE')
+    @UseGuards(RoleGuard) */
     @ApiOperation({
         summary: 'Cadastrar um novo ativo para um cliente existente',
     })

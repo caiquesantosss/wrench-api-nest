@@ -14,7 +14,7 @@ import { OrdemServico } from '../../domain/entities/OrdemServico'
 export class AddItemOsUseCase {
     constructor(
         @Inject('OrdemServicoRepository')
-        private readonly serviceOrderRepository: OrdemServicoRepository,
+        private readonly ordemServicoRepository: OrdemServicoRepository,
 
         @Inject('CatalogItemRepository')
         private readonly catalogItemRepository: CatalogItemRepository,
@@ -25,7 +25,7 @@ export class AddItemOsUseCase {
         data: AddItemOsDTO,
     ): Promise<OrdemServico> {
         const serviceOrder =
-            await this.serviceOrderRepository.findById(serviceOrderId)
+            await this.ordemServicoRepository.findById(serviceOrderId)
 
         if (!serviceOrder) {
             throw new NotFoundException(
@@ -68,6 +68,6 @@ export class AddItemOsUseCase {
             Number(catalogItem.valor_unitario),
         )
 
-        return await this.serviceOrderRepository.save(serviceOrder)
+        return await this.ordemServicoRepository.save(serviceOrder)
     }
 }

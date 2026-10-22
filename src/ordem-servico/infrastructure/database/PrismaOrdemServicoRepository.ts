@@ -6,7 +6,7 @@ import { OrdemServicoRepository } from '../../domain/repositories/OrdemServicoRe
 
 @Injectable()
 export class PrismaOrdemServicoRepository implements OrdemServicoRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async save(os: OrdemServico): Promise<OrdemServico> {
     const serviceOrderData = {
@@ -118,6 +118,7 @@ export class PrismaOrdemServicoRepository implements OrdemServicoRepository {
     return this.mapToDomain(serviceOrderData)
   }
 
+
   private mapToDomain(data: any): OrdemServico {
     const serviceOrder = OrdemServico.recover(
       data.id_ordem_servico,
@@ -137,8 +138,8 @@ export class PrismaOrdemServicoRepository implements OrdemServicoRepository {
       data.data_conclusao
     )
 
-    if (data.item_os?.length) {
-      const restoredItems = data.item_os.map((itemData: any) =>
+    if (data.itens_os?.length) {
+      const restoredItems = data.itens_os.map((itemData: any) =>
         ItemOS.recover(
           itemData.id_item_os,
           itemData.id_catalogo_item,

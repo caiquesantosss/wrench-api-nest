@@ -8,7 +8,7 @@ import {
     Patch,
     Post,
     UseGuards,
-    UsePipes
+    Delete
 } from '@nestjs/common'
 
 import {
@@ -21,7 +21,7 @@ import {
     ApiUnauthorizedResponse,
     ApiParam,
     ApiOkResponse,
-    ApiBadRequestResponse
+    ApiBadRequestResponse,
 } from '@nestjs/swagger'
 
 import { JwtAuthGuard } from '../../usuario/shared/guards/jwt-auth-guard'
@@ -42,6 +42,7 @@ import { BudgetDefineUseCase } from '../application/use-cases/budget-define-use-
 import { StartExecutionUseCase } from '../application/use-cases/start-execution-use-case'
 import { FinishServiceUseCase } from '../application/use-cases/finish-service-use-case'
 import { AddItemOsUseCase } from '../application/use-cases/add-item-os-use-case'
+import { RemoveItemOsUseCase } from '../application/use-cases/remove-item-os-use-case'
 
 @ApiTags('Ordem de Serviço')
 @ApiBearerAuth('JWT-auth')
@@ -54,7 +55,8 @@ export class OrdemServicoController {
         private readonly budgetDefineUseCase: BudgetDefineUseCase,
         private readonly startExecutionUseCase: StartExecutionUseCase,
         private readonly finishServiceUseCase: FinishServiceUseCase,
-        private readonly addItemOsUseCase: AddItemOsUseCase
+        private readonly addItemOsUseCase: AddItemOsUseCase,
+        private readonly removeItemOsUseCase: RemoveItemOsUseCase
     ) { }
 
     @Post()
@@ -298,15 +300,61 @@ export class OrdemServicoController {
     }
 
     @Post(':id/itens')
-    @ApiOperation({ summary: 'Adiciona uma peça ou serviço à Ordem de Serviço' })
-    @ApiParam({ name: 'id', description: 'ID da Ordem de Serviço' })
-    @UsePipes(new ZodValidationPipe(addItemOsSchema))
+    @ApiOperation({
+        summary: 'Adiciona uma peça ou serviço à Ordem de Serviço'
+    })
+    @ApiParam({
+        name: 'id',
+        description: 'ID da Ordem de Serviço',
+        type: Number,
+        example: 1
+    })
+    @ApiBody({
+        description: 'Dados do item do catálogo que será adicionado à OS',
+        schema: {
+            type: 'object',
+            required: ['id_catalogo_item', 'quantidade'],
+            properties: {
+                id_catalogo_item: {
+                    type: 'number',
+                    example: 5
+                },
+                quantidade: {
+                    type: 'number',
+                    example: 2
+                }
+            }
+        }
+    })
+    @ApiOkResponse({
+        description: 'Item adicionado à Ordem de Serviço com sucesso'
+    })
+    @ApiBadRequestResponse({
+        description: 'Dados inválidos ou item inativo'
+    })
+    @ApiNotFoundResponse({
+        description: 'Ordem de Serviço ou item do catálogo não encontrado'
+    })
     async adicionarItem(
         @Param('id', ParseIntPipe) id: number,
-        @Body() body: AddItemOsDTO
+        @Body(new ZodValidationPipe(addItemOsSchema)) body: AddItemOsDTO
     ) {
         const osAtualizada = await this.addItemOsUseCase.execute(id, body)
 
         return OrdemServicoMapper.toHttp(osAtualizada)
+    }
+
+    @Delete(':id/itens/:idItem')
+    @ApiOperation({ summary: 'Remove uma peça ou serviço da Ordem de Serviço' })
+    @ApiParam({ name: 'id', description: 'ID da Ordem de Serviço' })
+    @ApiParam({ name: 'idItem', description: 'ID do item do catálogo a ser removido' })
+    async removerItem(
+        @Param('id', ParseIntPipe) serviceOrderId: number,
+        @Param('idItem', ParseIntPipe) catalogItemId: number
+    ) {
+        const serviceOrderAtualizada = await this.removeItemOsUseCase.execute(serviceOrderId, catalogItemId);
+
+
+        return OrdemServicoMapper.toHttp(serviceOrderAtualizada);
     }
 }
