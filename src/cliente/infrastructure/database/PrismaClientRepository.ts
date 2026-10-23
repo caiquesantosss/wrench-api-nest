@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common"
 import { PrismaService } from "../../../prisma/prisma.service"
-import { Ativo } from "../../domain/entities/Ativo"
 import { Cliente } from "../../domain/entities/Cliente"
 import { ClientRepository } from "../../domain/repositories/ClientRepository"
 
@@ -60,42 +59,6 @@ export class PrismaClientRepository implements ClientRepository {
         return this.mapToClientDomain(prismaClient)
     }
 
-    async saveAtivo(ativo: Ativo): Promise<Ativo> {
-        const datas = {
-            id_cliente: ativo.id_cliente,
-            descricao: ativo.descricao,
-            tipo: ativo.tipo,
-            marca: ativo.marca,
-            modelo: ativo.modelo,
-            identificacao: ativo.identificacao,
-            observacoes: ativo.observacoes,
-            ativo: ativo.ativo,
-        }
-
-        if (ativo.id_ativo) {
-            const updatedAtivo = await this.prisma.ativo.update({
-                where: { id_ativo: ativo.id_ativo },
-                data: datas,
-            })
-
-            return this.mapToAtivoDomain(updatedAtivo)
-        }
-
-        const createdAtivo = await this.prisma.ativo.create({
-            data: datas,
-        })
-
-        return this.mapToAtivoDomain(createdAtivo)
-    }
-
-    async listCLientsAtivo(id_cliente: number): Promise<Ativo[]> {
-        const ativos = await this.prisma.ativo.findMany({
-            where: { id_cliente },
-        })
-
-        return ativos.map((ativo) => this.mapToAtivoDomain(ativo))
-    }
-
     private mapToClientDomain(data: any): Cliente {
         return Cliente.recover(
             data.id_cliente,
@@ -105,20 +68,6 @@ export class PrismaClientRepository implements ClientRepository {
             data.telefone,
             data.email,
             data.endereco,
-        )
-    }
-
-    private mapToAtivoDomain(data: any): Ativo {
-        return Ativo.recover(
-            data.id_ativo,
-            data.id_cliente,
-            data.descricao,
-            data.tipo,
-            data.ativo,
-            data.marca,
-            data.modelo,
-            data.identificacao,
-            data.observacoes,
         )
     }
 }

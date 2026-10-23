@@ -15,6 +15,7 @@ import { RemoveItemOsUseCase } from './application/use-cases/remove-item-os-use-
 import { CancelItemOsUseCase } from './application/use-cases/cancel-item-os-use-case'
 import { CompleteServiceOrderUseCase } from './application/use-cases/complete-service-order-use-case'
 import { PrismaUnitOfWork } from '../shared/infrastructure/prisma-unit-of-work'
+import { PrismaAtivoRepository } from '../ativo/infrastructure/database/PrismaAtivoRepository'
 
 @Module({
   imports: [
@@ -31,6 +32,10 @@ import { PrismaUnitOfWork } from '../shared/infrastructure/prisma-unit-of-work'
     {
       provide: 'UnitOfWork', 
       useClass: PrismaUnitOfWork
+    },
+    {
+      provide: 'AtivoRepository', 
+      useClass: PrismaAtivoRepository
     },
     OpenServiceOrderUseCase,
     AddDiagnosticUseCase, 

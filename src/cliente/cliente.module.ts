@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common'
 import { ClienteController } from './presentation/cliente.controller'
 import { PrismaClientRepository } from './infrastructure/database/PrismaClientRepository'
 import { CreateClientUseCase } from './application/use-cases/create-client-use-case'
-import { CreateAssetUseCase } from './application/use-cases/create-asset-use-case'
 
 import { UsuarioModule } from '../usuario/usuario.module'
 
@@ -15,7 +14,6 @@ import { UsuarioModule } from '../usuario/usuario.module'
       useClass: PrismaClientRepository, 
     },
     CreateClientUseCase,
-    CreateAssetUseCase,
   ],
 
   exports: ['ClientRepository'],

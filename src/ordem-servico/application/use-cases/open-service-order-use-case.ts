@@ -3,6 +3,7 @@ import { OrdemServicoRepository } from "../../domain/repositories/OrdemServicoRe
 import { ClientRepository } from "../../../cliente/domain/repositories/ClientRepository";
 import { OpenOsDTO } from "../dtos/open-os.dto";
 import { OrdemServico } from "../../domain/entities/OrdemServico";
+import { AtivoRepository } from "../../../ativo/domain/repositories/AtivoRepository";
 
 @Injectable()
 export class OpenServiceOrderUseCase {
@@ -10,7 +11,10 @@ export class OpenServiceOrderUseCase {
         @Inject('OrdemServicoRepository')
         private readonly osRepository: OrdemServicoRepository,
 
-        @Inject('ClientRepository')
+        @Inject('AtivoRepository') 
+        private readonly ativoRepository: AtivoRepository,
+
+        @Inject('ClientRepository') 
         private readonly clientRepository: ClientRepository
     ) { }
 
@@ -24,7 +28,7 @@ export class OpenServiceOrderUseCase {
             throw new NotFoundException('Cliente não encontrado')
         }
 
-        const ativosDoCliente = await this.clientRepository.listCLientsAtivo(
+        const ativosDoCliente = await this.ativoRepository.listByClient(
             data.id_cliente
         )
 
