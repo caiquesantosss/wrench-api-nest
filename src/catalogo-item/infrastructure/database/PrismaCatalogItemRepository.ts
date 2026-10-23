@@ -1,12 +1,14 @@
-import { Injectable } from "@nestjs/common";
-import { CatalogItemRepository } from "../../domain/repositories/CatalogItemRepository";
-import { CatalogoItem } from "../../../generated/prisma/client";
-import { CatalogItem } from "../../domain/entities/CatalogItem";
-import { PrismaService } from "../../../prisma/prisma.service";
+import { Injectable } from "@nestjs/common"
+import { CatalogItemRepository } from "../../domain/repositories/CatalogItemRepository"
+import { CatalogItem } from "../../domain/entities/CatalogItem"
+import { PrismaService } from "../../../prisma/prisma.service"
+import { Prisma } from "../../../generated/prisma/client"
 
 @Injectable()
 export class PrismaCatalogItemRepository implements CatalogItemRepository {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private readonly prisma: PrismaService | Prisma.TransactionClient
+    ) { }
 
     async save(item: CatalogItem): Promise<CatalogItem> {
         const data = {
@@ -52,7 +54,7 @@ export class PrismaCatalogItemRepository implements CatalogItemRepository {
             where: { ativo: true }
         })
 
-        return prismaItems.map(item => this.mapToDomain(item))
+        return prismaItems.map((item: any) => this.mapToDomain(item))
     }
 
 

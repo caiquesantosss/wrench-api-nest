@@ -1,65 +1,47 @@
-import {
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common'
-
-import { OrdemServicoRepository } from '../../domain/repositories/OrdemServicoRepository'
-import { CatalogItemRepository } from '../../../catalogo-item/domain/repositories/CatalogItemRepository'
+import { Inject, Injectable, NotFoundException, BadRequestException } from '@nestjs/common'
+import { UnitOfWork } from '../../../shared/application/interfaces/unit-of-work.interface'
 import { OrdemServico } from '../../domain/entities/OrdemServico'
 
 @Injectable()
 export class CompleteServiceOrderUseCase {
   constructor(
-    @Inject('OrdemServicoRepository')
-    private readonly ordemServicoRepository: OrdemServicoRepository,
-
-    @Inject('CatalogItemRepository')
-    private readonly catalogItemRepository: CatalogItemRepository,
+    @Inject('UnitOfWork')
+    private readonly uow: UnitOfWork,
   ) {}
 
-  async execute(
-    id_os: number,
-    appliedSolution: string,
-  ): Promise<OrdemServico> {
-    const serviceOrder =
-      await this.ordemServicoRepository.findById(id_os)
+  async execute(serviceOrderId: number, solucaoAplicada: string): Promise<OrdemServico> {
+    return this.uow.runInTransaction(async (osRepo, catalogRepo) => {
+      const serviceOrder = await osRepo.findById(serviceOrderId)
 
-    if (!serviceOrder) {
-      throw new NotFoundException(
-        'Não foi possível localizar a ordem de serviço.',
-      )
-    }
-
-    serviceOrder.completeService(appliedSolution)
-
-    for (const item of serviceOrder.items) {
-      if (
-        item.tipo_item !== 'PRODUTO' ||
-        item.status_aprovacao === 'REJEITADO' ||
-        item.baixa_estoque
-      ) {
-        continue
+      if (!serviceOrder) {
+        throw new NotFoundException('Ordem de serviço não encontrada.')
       }
 
-      const catalogItem =
-        await this.catalogItemRepository.findById(
-          item.id_catalogo_item,
-        )
+      serviceOrder.completeService(solucaoAplicada)
 
-      if (!catalogItem) {
-        throw new NotFoundException(
-          `Produto ${item.id_catalogo_item} não encontrado no catálogo.`,
-        )
+      for (const item of serviceOrder.items) {
+        if (
+          item.tipo_item === 'PRODUTO' &&
+          item.status_aprovacao !== 'REJEITADO' &&
+          !item.baixa_estoque
+        ) {
+          const catalogItem = await catalogRepo.findById(item.id_catalogo_item)
+
+          if (!catalogItem) {
+            throw new BadRequestException(
+              `Produto ${item.id_catalogo_item} não encontrado.`,
+            )
+          }
+
+          catalogItem.removeStock(Number(item.quantidade))
+
+          await catalogRepo.save(catalogItem)
+
+          item.markAsProcessed()
+        }
       }
 
-      catalogItem.removeStock(Number(item.quantidade))
-
-      await this.catalogItemRepository.save(catalogItem)
-
-      item.markAsProcessed()
-    }
-
-    return this.ordemServicoRepository.save(serviceOrder)
+      return osRepo.save(serviceOrder)
+    })
   }
 }

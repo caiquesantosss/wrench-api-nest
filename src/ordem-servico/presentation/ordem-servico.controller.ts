@@ -25,9 +25,9 @@ import {
     ApiBadRequestResponse,
 } from '@nestjs/swagger'
 
-import { JwtAuthGuard } from '../../usuario/shared/guards/jwt-auth-guard'
-import { LoggedUser } from '../../usuario/shared/decorators/logged-user-decorator'
-import { ZodValidationPipe } from '../../usuario/shared/pipes/zod-validation-pipe'
+import { JwtAuthGuard } from '../../shared/guards/jwt-auth-guard'
+import { LoggedUser } from '../../shared/decorators/logged-user-decorator'
+import { ZodValidationPipe } from '../../shared/pipes/zod-validation-pipe'
 
 import { OpenOsDTO, openOsSchema } from '../application/dtos/open-os.dto'
 import { AddDiagnosticDTO, addDiagnosticSchema } from '../application/dtos/add-diagnostic.dto'
