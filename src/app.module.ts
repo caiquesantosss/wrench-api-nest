@@ -7,6 +7,7 @@ import { UsuarioModule } from './usuario/usuario.module'
 import { ClienteModule } from './cliente/cliente.module';
 import { OrdemServicoModule } from './ordem-servico/ordem-servico.module'
 import { CatalogoItemModule } from './catalogo-item/catalogo-item.module';
+import { AtivoModule } from './ativo/ativo.module';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule()
 
@@ -22,6 +23,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule()
     ClienteModule,
     OrdemServicoModule,
     CatalogoItemModule,
+    AtivoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
