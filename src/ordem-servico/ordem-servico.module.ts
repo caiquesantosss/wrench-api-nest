@@ -14,6 +14,7 @@ import { CatalogoItemModule } from '../catalogo-item/catalogo-item.module'
 import { RemoveItemOsUseCase } from './application/use-cases/remove-item-os-use-case'
 import { CancelItemOsUseCase } from './application/use-cases/cancel-item-os-use-case'
 import { CompleteServiceOrderUseCase } from './application/use-cases/complete-service-order-use-case'
+import { PrismaUnitOfWork } from '../shared/infrastructure/prisma-unit-of-work'
 
 @Module({
   imports: [
@@ -26,6 +27,10 @@ import { CompleteServiceOrderUseCase } from './application/use-cases/complete-se
     {
       provide: 'OrdemServicoRepository',
       useClass: PrismaOrdemServicoRepository,
+    },
+    {
+      provide: 'UnitOfWork', 
+      useClass: PrismaUnitOfWork
     },
     OpenServiceOrderUseCase,
     AddDiagnosticUseCase, 

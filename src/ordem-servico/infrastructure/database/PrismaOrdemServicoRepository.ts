@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { PrismaService } from '../../../prisma/prisma.service'
 import { OrdemServico, StatusOS } from '../../domain/entities/OrdemServico'
 import { ItemOS } from '../../domain/entities/ItemOS'
@@ -8,7 +8,8 @@ import { Prisma } from '../../../generated/prisma/client'
 @Injectable()
 export class PrismaOrdemServicoRepository implements OrdemServicoRepository {
   constructor(
-    private readonly prisma: PrismaService | Prisma.TransactionClient
+    @Inject(PrismaService)
+    private readonly prisma: Prisma.TransactionClient
   ) { }
 
   async save(os: OrdemServico): Promise<OrdemServico> {

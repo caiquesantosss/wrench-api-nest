@@ -11,6 +11,7 @@ import { BcryptHasher } from './infrastructure/cryptography/BcryptHasher';
   imports: [
     JwtModule.register({
       secret: env.JWT_SECRET,
+      global: true,
       signOptions: { expiresIn: '8h' },
     })
   ],

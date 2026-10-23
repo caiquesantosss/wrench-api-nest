@@ -5,6 +5,8 @@ import { CatalogItemRepository } from "../../catalogo-item/domain/repositories/C
 import { OrdemServicoRepository } from "../../ordem-servico/domain/repositories/OrdemServicoRepository"
 import { PrismaCatalogItemRepository } from "../../catalogo-item/infrastructure/database/PrismaCatalogItemRepository"
 import { PrismaOrdemServicoRepository } from "../../ordem-servico/infrastructure/database/PrismaOrdemServicoRepository"
+import { AtivoRepository } from "../../ativo/domain/repositories/AtivoRepository"
+import { PrismaAtivoRepository } from "../../ativo/infrastructure/database/PrismaAtivoRepository"
 
 @Injectable()
 export class PrismaUnitOfWork implements UnitOfWork {
@@ -13,13 +15,15 @@ export class PrismaUnitOfWork implements UnitOfWork {
     async runInTransaction<T>(
         work: (
             osRepo: OrdemServicoRepository,
-            catalogRepo: CatalogItemRepository
+            catalogRepo: CatalogItemRepository, 
+            ativoRepo: AtivoRepository
         ) => Promise<T>): Promise<T> {
         return await this.prisma.$transaction(async (tx) => {
             const osRepoTx = new PrismaOrdemServicoRepository(tx)
             const osCatalogTx = new PrismaCatalogItemRepository(tx)
+            const osAtivoTx = new PrismaAtivoRepository(tx)
 
-            return await work(osRepoTx, osCatalogTx)
+            return await work(osRepoTx, osCatalogTx, osAtivoTx)
         })
     }
 

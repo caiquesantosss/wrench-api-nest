@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { FastifyRequest } from 'fastify'
-import { env } from '../../../env/env'
+import { env } from '../../env/env'
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -21,7 +21,6 @@ export class JwtAuthGuard implements CanActivate {
         secret: env.JWT_SECRET,
       });
       
-      // Anexa o payload ao objeto request para ser usado nos Controllers
       (request as any).user = payload
       
     } catch {

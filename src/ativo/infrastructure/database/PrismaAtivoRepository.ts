@@ -1,13 +1,14 @@
-import { Injectable } from "@nestjs/common"
+import { Inject, Injectable } from "@nestjs/common"
 import { AtivoRepository } from "../../domain/repositories/AtivoRepository"
 import { PrismaService } from "../../../prisma/prisma.service"
-import { Prisma } from "../../../generated/prisma/client"
 import { Ativo } from "../../domain/entities/ativo"
+import { Prisma } from "../../../generated/prisma/client"
 
 @Injectable()
 export class PrismaAtivoRepository implements AtivoRepository {
     constructor(
-        private readonly prisma: PrismaService | Prisma.TransactionClient
+        @Inject(PrismaService)
+        private readonly prisma: Prisma.TransactionClient
     ) { }
 
     async save(ativo: Ativo): Promise<Ativo> {

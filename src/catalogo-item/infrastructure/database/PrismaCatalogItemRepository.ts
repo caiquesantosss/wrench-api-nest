@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common"
+import { Inject, Injectable } from "@nestjs/common"
 import { CatalogItemRepository } from "../../domain/repositories/CatalogItemRepository"
 import { CatalogItem } from "../../domain/entities/CatalogItem"
 import { PrismaService } from "../../../prisma/prisma.service"
@@ -7,7 +7,8 @@ import { Prisma } from "../../../generated/prisma/client"
 @Injectable()
 export class PrismaCatalogItemRepository implements CatalogItemRepository {
     constructor(
-        private readonly prisma: PrismaService | Prisma.TransactionClient
+        @Inject(PrismaService)
+        private readonly prisma: Prisma.TransactionClient
     ) { }
 
     async save(item: CatalogItem): Promise<CatalogItem> {

@@ -14,8 +14,8 @@ import {
     ApiResponse,
 } from '@nestjs/swagger';
 
-import { JwtAuthGuard } from '../../usuario/shared/guards/jwt-auth-guard';
-import { ZodValidationPipe } from '../../usuario/shared/pipes/zod-validation-pipe';
+import { JwtAuthGuard } from '../../shared/guards/jwt-auth-guard';
+import { ZodValidationPipe } from '../../shared/pipes/zod-validation-pipe';
 
 import { CreateClientUseCase } from '../application/use-cases/create-client-use-case';
 import {
@@ -28,8 +28,6 @@ import {
     createAssetSchema,
     CreateAssetDto,
 } from '../application/dtos/create-asset.dto';
-import { RoleGuard } from '../shared/guards/roles.guard';
-import { Roles } from '../shared/decorators/roles.decorator';
 
 @ApiTags('Clientes e Ativos')
 @ApiBearerAuth('JWT-auth')

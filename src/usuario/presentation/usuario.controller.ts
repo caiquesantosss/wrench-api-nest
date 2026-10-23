@@ -21,7 +21,7 @@ import {
 import { CreateUserUseCase } from '../application/use-cases/create-user-use-case';
 import { AuthenticateUserUseCase } from '../application/use-cases/authenticate-user-use-case';
 
-import { ZodValidationPipe } from '../shared/pipes/zod-validation-pipe';
+import { ZodValidationPipe } from '../../shared/pipes/zod-validation-pipe';
 
 import {
     CreateUserDTO,
@@ -33,8 +33,8 @@ import {
     authenticateUserSchema,
 } from '../application/dtos/authenticate-user.dto';
 
-import { JwtAuthGuard } from '../shared/guards/jwt-auth-guard';
-import { LoggedUser } from '../shared/decorators/logged-user-decorator';
+import { JwtAuthGuard } from '../../shared/guards/jwt-auth-guard';
+import { LoggedUser } from '../../shared/decorators/logged-user-decorator';
 
 @ApiTags('Utilizadores')
 @Controller('users')

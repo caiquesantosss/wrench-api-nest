@@ -9,7 +9,6 @@ import {
     Patch,
     Post,
     UseGuards,
-    UsePipes
 } from '@nestjs/common'
 
 import {
@@ -24,8 +23,8 @@ import {
     ApiParam
 } from '@nestjs/swagger'
 
-import { JwtAuthGuard } from '../../usuario/shared/guards/jwt-auth-guard'
-import { ZodValidationPipe } from '../../usuario/shared/pipes/zod-validation-pipe'
+import { JwtAuthGuard } from '../../shared/guards/jwt-auth-guard'
+import { ZodValidationPipe } from '../../shared/pipes/zod-validation-pipe'
 
 import { CreateCatalogItemDTO, createCatalogItemSchema } from '../application/dtos/create-catalog-item.dto'
 import { UpdateCatalogItemDTO, updateCatalogItemSchema } from '../application/dtos/update-catalog-item.dto'
