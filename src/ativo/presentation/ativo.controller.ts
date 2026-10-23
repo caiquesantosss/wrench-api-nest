@@ -4,7 +4,10 @@ import {
     HttpCode,
     HttpStatus,
     Post,
-    UseGuards
+    Get,
+    UseGuards,
+    Param,
+    ParseIntPipe
 } from '@nestjs/common'
 import {
     ApiTags,
@@ -12,7 +15,9 @@ import {
     ApiCreatedResponse,
     ApiConflictResponse,
     ApiBearerAuth,
-    ApiBody
+    ApiBody,
+    ApiOkResponse,
+    ApiNotFoundResponse,
 } from '@nestjs/swagger'
 
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth-guard'
@@ -22,6 +27,7 @@ import { CreateAtivoDTO, createAtivoSchema } from '../application/dtos/create-at
 import { AtivoMapper } from './mappers/ativo.mapper'
 
 import { CreateAtivoUseCase } from '../application/use-cases/create-ativo-use-case'
+import { FindAtivoUseCase } from '../application/use-cases/find-ativo-use-case'
 
 @ApiTags('Ativos')
 @ApiBearerAuth('JWT-auth')
@@ -30,6 +36,7 @@ import { CreateAtivoUseCase } from '../application/use-cases/create-ativo-use-ca
 export class AtivoController {
     constructor(
         private readonly createAtivoUseCase: CreateAtivoUseCase,
+        private readonly findAtivoUseCase: FindAtivoUseCase
     ) { }
 
     @Post()
@@ -65,5 +72,23 @@ export class AtivoController {
         const novoAtivo = await this.createAtivoUseCase.execute(body)
 
         return AtivoMapper.toHttp(novoAtivo)
+    }
+
+    @Get(':id')
+    @HttpCode(HttpStatus.OK)
+    @ApiBearerAuth('JWT-auth')
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({
+        summary: 'Buscar um ativo por ID',
+        description: 'Retorna os detalhes de um veículo ou máquina específico.'
+    })
+    @ApiOkResponse({ description: 'Ativo encontrado com sucesso.' })
+    @ApiNotFoundResponse({ description: 'Ativo não encontrado.' })
+    async buscarPorId(
+        @Param('id', ParseIntPipe) id: number,
+    ) {
+        const ativo = await this.findAtivoUseCase.execute(id);
+
+        return AtivoMapper.toHttp(ativo);
     }
 }
