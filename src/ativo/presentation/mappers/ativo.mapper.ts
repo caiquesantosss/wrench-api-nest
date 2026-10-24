@@ -9,10 +9,14 @@ export class AtivoMapper {
       tipo: ativo.tipo,
       marca: ativo.marca ?? null,
       modelo: ativo.modelo ?? null,
-      identificacao: ativo.identificacao ?? null, 
+      identificacao: ativo.identificacao ?? null,
       observacoes: ativo.observacoes ?? null,
       ativo: ativo.ativo,
       data_cadastro: ativo.data_cadastro,
     };
+  }
+
+  static toHttpList(ativos: Ativo[]) {
+    return ativos.map((ativo) => this.toHttp(ativo))
   }
 }

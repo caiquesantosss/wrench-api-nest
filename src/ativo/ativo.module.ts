@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { AtivoController } from './presentation/ativo.controller'
 import { CreateAtivoUseCase } from './application/use-cases/create-ativo-use-case'
 import { PrismaAtivoRepository } from './infrastructure/database/PrismaAtivoRepository'
-import { FindAtivoUseCase } from './application/use-cases/find-ativo-use-case';
+import { FindAtivoUseCase } from './application/use-cases/find-ativo-use-case'
+import { ListAtivoUseCase } from './application/use-cases/list-ativo-use-case'
+import { PrismaClientRepository } from '../cliente/infrastructure/database/PrismaClientRepository';
 
 @Module({
   controllers: [AtivoController],
@@ -11,8 +13,13 @@ import { FindAtivoUseCase } from './application/use-cases/find-ativo-use-case';
       provide: 'AtivoRepository',
       useClass: PrismaAtivoRepository,
     },
+    {
+      provide: 'ClientRepository', 
+      useClass: PrismaClientRepository
+    },
     CreateAtivoUseCase,
-    FindAtivoUseCase
+    FindAtivoUseCase,
+    ListAtivoUseCase
   ],
   exports: ['AtivoRepository']
 })

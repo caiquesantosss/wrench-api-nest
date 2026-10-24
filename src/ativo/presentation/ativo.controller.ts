@@ -7,7 +7,8 @@ import {
     Get,
     UseGuards,
     Param,
-    ParseIntPipe
+    ParseIntPipe,
+    Query
 } from '@nestjs/common'
 import {
     ApiTags,
@@ -28,6 +29,9 @@ import { AtivoMapper } from './mappers/ativo.mapper'
 
 import { CreateAtivoUseCase } from '../application/use-cases/create-ativo-use-case'
 import { FindAtivoUseCase } from '../application/use-cases/find-ativo-use-case'
+import { ListAtivoUseCase } from '../application/use-cases/list-ativo-use-case'
+import { ListAtivosDTO, listAtivosSchema } from '../application/dtos/list-ativos.dto'
+import { LoggedUser } from '../../shared/decorators/logged-user-decorator'
 
 @ApiTags('Ativos')
 @ApiBearerAuth('JWT-auth')
@@ -36,7 +40,8 @@ import { FindAtivoUseCase } from '../application/use-cases/find-ativo-use-case'
 export class AtivoController {
     constructor(
         private readonly createAtivoUseCase: CreateAtivoUseCase,
-        private readonly findAtivoUseCase: FindAtivoUseCase
+        private readonly findAtivoUseCase: FindAtivoUseCase,
+        private readonly listAtivoUseCase: ListAtivoUseCase
     ) { }
 
     @Post()
@@ -65,7 +70,7 @@ export class AtivoController {
     @ApiConflictResponse({
         description: 'Já existe um ativo com esta identificação.'
     })
-    async cadastrar(
+    async create(
         @Body(new ZodValidationPipe(createAtivoSchema))
         body: CreateAtivoDTO,
     ) {
@@ -76,8 +81,6 @@ export class AtivoController {
 
     @Get(':id')
     @HttpCode(HttpStatus.OK)
-    @ApiBearerAuth('JWT-auth')
-    @UseGuards(JwtAuthGuard)
     @ApiOperation({
         summary: 'Buscar um ativo por ID',
         description: 'Retorna os detalhes de um veículo ou máquina específico.'
@@ -87,8 +90,18 @@ export class AtivoController {
     async buscarPorId(
         @Param('id', ParseIntPipe) id: number,
     ) {
-        const ativo = await this.findAtivoUseCase.execute(id);
+        const ativo = await this.findAtivoUseCase.execute(id)
 
-        return AtivoMapper.toHttp(ativo);
+        return AtivoMapper.toHttp(ativo)
+    }
+
+    @Get('meus-ativos')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Listar ativos do utilizador autenticado' })
+    async listarMeusAtivos(
+        @LoggedUser('sub') idClienteLogado: number,
+    ) {
+        const ativos = await this.listAtivoUseCase.execute(idClienteLogado);
+        return ativos.map(ativo => AtivoMapper.toHttp(ativo));
     }
 }
