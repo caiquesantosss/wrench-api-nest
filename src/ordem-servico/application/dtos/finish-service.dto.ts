@@ -1,4 +1,4 @@
-import z from "zod";
+import z from "zod"
 
 export const finishServiceSchema = z.object({
     solucao_aplicada: z.string().min(10, 

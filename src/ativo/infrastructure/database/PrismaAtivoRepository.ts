@@ -63,7 +63,7 @@ export class PrismaAtivoRepository implements AtivoRepository {
             where: { identificacao }
         })
 
-        if (!ativoDb) return null;
+        if (!ativoDb) return null
         return this.mapToDomain(ativoDb)
     }
 

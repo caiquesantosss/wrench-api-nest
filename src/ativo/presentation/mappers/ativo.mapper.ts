@@ -13,7 +13,7 @@ export class AtivoMapper {
       observacoes: ativo.observacoes ?? null,
       ativo: ativo.ativo,
       data_cadastro: ativo.data_cadastro,
-    };
+    }
   }
 
   static toHttpList(ativos: Ativo[]) {

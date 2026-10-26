@@ -1,6 +1,6 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { CatalogItemRepository } from "../../domain/repositories/CatalogItemRepository";
-import { CatalogItem } from "../../domain/entities/CatalogItem";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common"
+import { CatalogItemRepository } from "../../domain/repositories/CatalogItemRepository"
+import { CatalogItem } from "../../domain/entities/CatalogItem"
 
 @Injectable()
 export class RemoveStockUseCase {

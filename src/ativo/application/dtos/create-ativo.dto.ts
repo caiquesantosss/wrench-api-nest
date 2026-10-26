@@ -9,6 +9,6 @@ export const createAtivoSchema = z.object({
     modelo: z.string().nullable().optional(),
     identificacao: z.string().nullable().optional(),
     observacoes: z.string().nullable().optional(),
-});
+})
 
 export type CreateAtivoDTO = z.infer<typeof createAtivoSchema>

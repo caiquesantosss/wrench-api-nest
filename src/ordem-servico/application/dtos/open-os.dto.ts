@@ -1,4 +1,4 @@
-import z from "zod";
+import z from "zod"
 
 export const openOsSchema = z.object({
     id_cliente: z.number().positive('O ID do cliente é obrigatório.'),

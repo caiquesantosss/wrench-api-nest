@@ -1,7 +1,7 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { AtivoRepository } from "../../domain/repositories/AtivoRepository";
-import { Ativo } from "../../domain/entities/ativo";
-import { ClientRepository } from "../../../cliente/domain/repositories/ClientRepository";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common"
+import { AtivoRepository } from "../../domain/repositories/AtivoRepository"
+import { Ativo } from "../../domain/entities/ativo"
+import { ClientRepository } from "../../../cliente/domain/repositories/ClientRepository"
 
 @Injectable()
 export class ListAtivoUseCase {

@@ -70,6 +70,6 @@ export class PrismaCatalogItemRepository implements CatalogItemRepository {
             Number(data.estoque_minimo),
             data.ativo,
             data.data_cadastro
-        );
+        )
     }
 }

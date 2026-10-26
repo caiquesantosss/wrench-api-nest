@@ -1,7 +1,7 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { OrdemServicoRepository } from "../../domain/repositories/OrdemServicoRepository";
-import { BudgetDefineDTO } from "../dtos/budget-define.dto";
-import { OrdemServico } from "../../domain/entities/OrdemServico";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common"
+import { OrdemServicoRepository } from "../../domain/repositories/OrdemServicoRepository"
+import { BudgetDefineDTO } from "../dtos/budget-define.dto"
+import { OrdemServico } from "../../domain/entities/OrdemServico"
 
 @Injectable()
 export class BudgetDefineUseCase {

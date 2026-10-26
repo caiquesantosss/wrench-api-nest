@@ -1,7 +1,7 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { OrdemServicoRepository } from "../../domain/repositories/OrdemServicoRepository";
-import { OrdemServico } from "../../domain/entities/OrdemServico";
-import { FinishServiceDTO } from "../dtos/finish-service.dto";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common"
+import { OrdemServicoRepository } from "../../domain/repositories/OrdemServicoRepository"
+import { OrdemServico } from "../../domain/entities/OrdemServico"
+import { FinishServiceDTO } from "../dtos/finish-service.dto"
 
 @Injectable()
 export class FinishServiceUseCase {

@@ -1,13 +1,13 @@
-import { Module } from '@nestjs/common';
-import { createObserveModule } from '@nestjs/observe';
-import { AppController } from './app.controller.js';
-import { AppService } from './app.service.js';
+import { Module } from '@nestjs/common'
+import { createObserveModule } from '@nestjs/observe'
+import { AppController } from './app.controller.js'
+import { AppService } from './app.service.js'
 import { PrismaModule } from './prisma/prisma.module'
 import { UsuarioModule } from './usuario/usuario.module'
-import { ClienteModule } from './cliente/cliente.module';
+import { ClienteModule } from './cliente/cliente.module'
 import { OrdemServicoModule } from './ordem-servico/ordem-servico.module'
-import { CatalogoItemModule } from './catalogo-item/catalogo-item.module';
-import { AtivoModule } from './ativo/ativo.module';
+import { CatalogoItemModule } from './catalogo-item/catalogo-item.module'
+import { AtivoModule } from './ativo/ativo.module'
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule()
 

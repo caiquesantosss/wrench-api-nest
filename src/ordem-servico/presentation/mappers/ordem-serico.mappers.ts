@@ -1,4 +1,4 @@
-import { OrdemServico } from '../../domain/entities/OrdemServico';
+import { OrdemServico } from '../../domain/entities/OrdemServico'
 
 export class OrdemServicoMapper {
   static toHttp(os: OrdemServico) {
@@ -30,6 +30,6 @@ export class OrdemServicoMapper {
         baixa_estoque: item.baixa_estoque,
         data_cadastro: item.data_cadastro,
       })),
-    };
+    }
   }
 }

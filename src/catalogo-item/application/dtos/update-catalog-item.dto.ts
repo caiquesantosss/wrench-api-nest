@@ -1,4 +1,4 @@
-import z from "zod";
+import z from "zod"
 
 export const updateCatalogItemSchema = z.object({
     descricao: z.string().min(3).optional(),

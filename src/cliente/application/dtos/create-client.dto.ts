@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { isValidCNPJ, isValidCPF } from '../../utils/document-validator';
+import { z } from 'zod'
+import { isValidCNPJ, isValidCPF } from '../../utils/document-validator'
 
 export const createClientSchema = z.object({
     nome: z.string().min(3, 'O nome dever ter no minímo 3 caracteres'),
@@ -15,6 +15,6 @@ export const createClientSchema = z.object({
     telefone: z.string().optional(),
     email: z.email('Formato do e-mail inválido!').optional(),
     endereco: z.string().optional(),
-});
+})
 
 export type CreateClientDto = z.infer<typeof createClientSchema>

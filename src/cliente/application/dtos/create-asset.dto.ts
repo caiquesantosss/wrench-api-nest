@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 export const createAssetSchema = z.object({
   id_cliente: z.number().positive('Client ID is required.'), 
@@ -11,6 +11,6 @@ export const createAssetSchema = z.object({
   modelo: z.string().optional(),
   identificacao: z.string().optional(),
   observacoes: z.string().optional(),
-});
+})
 
-export type CreateAssetDto = z.infer<typeof createAssetSchema>;
+export type CreateAssetDto = z.infer<typeof createAssetSchema>

@@ -125,7 +125,7 @@ export class CatalogItem {
         }
 
         if (this._estoque_atual - quantity < 0) {
-            throw new Error('Estoque insuficiente para realizar a baixa.');
+            throw new Error('Estoque insuficiente para realizar a baixa.')
         }
 
         this._estoque_atual -= quantity

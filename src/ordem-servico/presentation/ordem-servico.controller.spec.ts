@@ -1,18 +1,18 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { OrdemServicoController } from './ordem-servico.controller';
+import { Test, TestingModule } from '@nestjs/testing'
+import { OrdemServicoController } from './ordem-servico.controller'
 
 describe('OrdemServicoController', () => {
-  let controller: OrdemServicoController;
+  let controller: OrdemServicoController
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [OrdemServicoController],
-    }).compile();
+    }).compile()
 
-    controller = module.get<OrdemServicoController>(OrdemServicoController);
-  });
+    controller = module.get<OrdemServicoController>(OrdemServicoController)
+  })
 
   it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-});
+    expect(controller).toBeDefined()
+  })
+})

@@ -10,10 +10,10 @@ export class PrismaUserRepository implements UserRepository {
   async findByEmail(email: string): Promise<User | null> {
     const prismaUser = await this.prisma.usuario.findUnique({
       where: { email },
-    });
+    })
 
-    if (!prismaUser) return null;
-    return this.mapToDomainUser(prismaUser);
+    if (!prismaUser) return null
+    return this.mapToDomainUser(prismaUser)
   }
 
   async save(user: User): Promise<User> {
@@ -25,9 +25,9 @@ export class PrismaUserRepository implements UserRepository {
         perfil: user.perfil,
         ativo: user.ativo,
       },
-    });
+    })
 
-    return this.mapToDomainUser(createdPrismaUser);
+    return this.mapToDomainUser(createdPrismaUser)
   }
 
   private mapToDomainUser(prismaData: any): User {
@@ -38,6 +38,6 @@ export class PrismaUserRepository implements UserRepository {
       prismaData.senha_hash,
       prismaData.perfil,
       prismaData.ativo
-    );
+    )
   }
 }

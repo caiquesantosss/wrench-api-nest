@@ -8,7 +8,7 @@ import {
     HttpStatus,
     UseGuards,
     Get,
-} from '@nestjs/common';
+} from '@nestjs/common'
 
 import {
     ApiBearerAuth,
@@ -16,25 +16,25 @@ import {
     ApiTags,
     ApiBody,
     ApiResponse,
-} from '@nestjs/swagger';
+} from '@nestjs/swagger'
 
-import { CreateUserUseCase } from '../application/use-cases/create-user-use-case';
-import { AuthenticateUserUseCase } from '../application/use-cases/authenticate-user-use-case';
+import { CreateUserUseCase } from '../application/use-cases/create-user-use-case'
+import { AuthenticateUserUseCase } from '../application/use-cases/authenticate-user-use-case'
 
-import { ZodValidationPipe } from '../../shared/pipes/zod-validation-pipe';
+import { ZodValidationPipe } from '../../shared/pipes/zod-validation-pipe'
 
 import {
     CreateUserDTO,
     createUserSchema,
-} from '../application/dtos/create-user.dto';
+} from '../application/dtos/create-user.dto'
 
 import {
     AuthenticateUserDTO,
     authenticateUserSchema,
-} from '../application/dtos/authenticate-user.dto';
+} from '../application/dtos/authenticate-user.dto'
 
-import { JwtAuthGuard } from '../../shared/guards/jwt-auth-guard';
-import { LoggedUser } from '../../shared/decorators/logged-user-decorator';
+import { JwtAuthGuard } from '../../shared/guards/jwt-auth-guard'
+import { LoggedUser } from '../../shared/decorators/logged-user-decorator'
 
 @ApiTags('Utilizadores')
 @Controller('users')
@@ -86,7 +86,7 @@ export class UsuarioController {
     })
     @UsePipes(new ZodValidationPipe(createUserSchema))
     async registrar(@Body() body: CreateUserDTO) {
-        return this.criarUsuarioUseCase.execute(body);
+        return this.criarUsuarioUseCase.execute(body)
     }
 
     @Post('login')
@@ -116,7 +116,7 @@ export class UsuarioController {
     })
     @UsePipes(new ZodValidationPipe(authenticateUserSchema))
     async login(@Body() body: AuthenticateUserDTO) {
-        return this.authenticateUserUseCase.execute(body);
+        return this.authenticateUserUseCase.execute(body)
     }
 
     @Get('me')
@@ -137,6 +137,6 @@ export class UsuarioController {
         return {
             mensagem: 'Acesso autorizado!',
             dados_do_token: currentUser,
-        };
+        }
     }
 }

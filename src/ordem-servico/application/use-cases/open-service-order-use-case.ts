@@ -1,9 +1,9 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { OrdemServicoRepository } from "../../domain/repositories/OrdemServicoRepository";
-import { ClientRepository } from "../../../cliente/domain/repositories/ClientRepository";
-import { OpenOsDTO } from "../dtos/open-os.dto";
-import { OrdemServico } from "../../domain/entities/OrdemServico";
-import { AtivoRepository } from "../../../ativo/domain/repositories/AtivoRepository";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common"
+import { OrdemServicoRepository } from "../../domain/repositories/OrdemServicoRepository"
+import { ClientRepository } from "../../../cliente/domain/repositories/ClientRepository"
+import { OpenOsDTO } from "../dtos/open-os.dto"
+import { OrdemServico } from "../../domain/entities/OrdemServico"
+import { AtivoRepository } from "../../../ativo/domain/repositories/AtivoRepository"
 
 @Injectable()
 export class OpenServiceOrderUseCase {

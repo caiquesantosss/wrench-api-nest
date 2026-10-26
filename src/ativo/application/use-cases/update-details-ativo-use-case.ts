@@ -28,7 +28,7 @@ export class UpdateDetailsAtivoUseCase {
         }
 
         if (data.identificacao !== undefined && data.identificacao !== null) {
-            const identificacaoFormatada = data.identificacao.trim().toUpperCase();
+            const identificacaoFormatada = data.identificacao.trim().toUpperCase()
 
             if (existsAtivo.identificacao !== identificacaoFormatada) {
                 const ativoExistente = await this.ativoRepository.findByIdentification(

@@ -382,8 +382,8 @@ export class OrdemServicoController {
             await this.completeServiceOrderUseCase.execute(
                 id,
                 body.appliedSolution,
-            );
+            )
 
-        return OrdemServicoMapper.toHttp(serviceOrder);
+        return OrdemServicoMapper.toHttp(serviceOrder)
     }
 }

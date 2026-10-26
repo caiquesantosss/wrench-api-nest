@@ -1,7 +1,7 @@
-import { ConflictException, Inject, Injectable } from "@nestjs/common";
-import { AtivoRepository } from "../../domain/repositories/AtivoRepository";
-import { CreateAtivoDTO } from "../dtos/create-ativo.dto";
-import { Ativo } from "../../domain/entities/ativo";
+import { ConflictException, Inject, Injectable } from "@nestjs/common"
+import { AtivoRepository } from "../../domain/repositories/AtivoRepository"
+import { CreateAtivoDTO } from "../dtos/create-ativo.dto"
+import { Ativo } from "../../domain/entities/ativo"
 
 @Injectable()
 export class CreateAtivoUseCase {

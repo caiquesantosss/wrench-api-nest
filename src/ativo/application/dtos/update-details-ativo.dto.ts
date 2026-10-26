@@ -8,6 +8,6 @@ export const updateAtivoSchema = z.object({
   modelo: z.string().nullable().optional(),
   identificacao: z.string().nullable().optional(),
   observacoes: z.string().nullable().optional(),
-});
+})
 
 export type UpdateAtivoDTO = z.infer<typeof updateAtivoSchema>

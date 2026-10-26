@@ -4,7 +4,7 @@ import {
     Body,
     UsePipes,
     UseGuards,
-} from '@nestjs/common';
+} from '@nestjs/common'
 
 import {
     ApiTags,
@@ -12,16 +12,16 @@ import {
     ApiBearerAuth,
     ApiBody,
     ApiResponse,
-} from '@nestjs/swagger';
+} from '@nestjs/swagger'
 
-import { JwtAuthGuard } from '../../shared/guards/jwt-auth-guard';
-import { ZodValidationPipe } from '../../shared/pipes/zod-validation-pipe';
+import { JwtAuthGuard } from '../../shared/guards/jwt-auth-guard'
+import { ZodValidationPipe } from '../../shared/pipes/zod-validation-pipe'
 
-import { CreateClientUseCase } from '../application/use-cases/create-client-use-case';
+import { CreateClientUseCase } from '../application/use-cases/create-client-use-case'
 import {
     createClientSchema,
     CreateClientDto,
-} from '../application/dtos/create-client.dto';
+} from '../application/dtos/create-client.dto'
 
 @ApiTags('Clientes e Ativos')
 @ApiBearerAuth('JWT-auth')
@@ -83,6 +83,6 @@ export class ClienteController {
     })
     @UsePipes(new ZodValidationPipe(createClientSchema))
     async cadastrarCliente(@Body() body: CreateClientDto) {
-        return this.createClientUseCase.execute(body);
+        return this.createClientUseCase.execute(body)
     }
 }
