@@ -4,7 +4,8 @@ import { CreateAtivoUseCase } from './application/use-cases/create-ativo-use-cas
 import { PrismaAtivoRepository } from './infrastructure/database/PrismaAtivoRepository'
 import { FindAtivoUseCase } from './application/use-cases/find-ativo-use-case'
 import { ListAtivoUseCase } from './application/use-cases/list-ativo-use-case'
-import { PrismaClientRepository } from '../cliente/infrastructure/database/PrismaClientRepository';
+import { PrismaClientRepository } from '../cliente/infrastructure/database/PrismaClientRepository'
+import { ToggleAtivoStatusUseCase } from './application/use-cases/toggle-ativo-status-use-case'
 
 @Module({
   controllers: [AtivoController],
@@ -19,7 +20,8 @@ import { PrismaClientRepository } from '../cliente/infrastructure/database/Prism
     },
     CreateAtivoUseCase,
     FindAtivoUseCase,
-    ListAtivoUseCase
+    ListAtivoUseCase,
+    ToggleAtivoStatusUseCase
   ],
   exports: ['AtivoRepository']
 })

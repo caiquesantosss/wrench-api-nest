@@ -8,7 +8,7 @@ import {
     UseGuards,
     Param,
     ParseIntPipe,
-    Query
+    Patch
 } from '@nestjs/common'
 import {
     ApiTags,
@@ -30,8 +30,8 @@ import { AtivoMapper } from './mappers/ativo.mapper'
 import { CreateAtivoUseCase } from '../application/use-cases/create-ativo-use-case'
 import { FindAtivoUseCase } from '../application/use-cases/find-ativo-use-case'
 import { ListAtivoUseCase } from '../application/use-cases/list-ativo-use-case'
-import { ListAtivosDTO, listAtivosSchema } from '../application/dtos/list-ativos.dto'
 import { LoggedUser } from '../../shared/decorators/logged-user-decorator'
+import { ToggleAtivoStatusUseCase } from '../application/use-cases/toggle-ativo-status-use-case'
 
 @ApiTags('Ativos')
 @ApiBearerAuth('JWT-auth')
@@ -41,7 +41,8 @@ export class AtivoController {
     constructor(
         private readonly createAtivoUseCase: CreateAtivoUseCase,
         private readonly findAtivoUseCase: FindAtivoUseCase,
-        private readonly listAtivoUseCase: ListAtivoUseCase
+        private readonly listAtivoUseCase: ListAtivoUseCase,
+        private readonly toggleAtivoStatusUseCase: ToggleAtivoStatusUseCase
     ) { }
 
     @Post()
@@ -101,7 +102,23 @@ export class AtivoController {
     async listarMeusAtivos(
         @LoggedUser('sub') idClienteLogado: number,
     ) {
-        const ativos = await this.listAtivoUseCase.execute(idClienteLogado);
-        return ativos.map(ativo => AtivoMapper.toHttp(ativo));
+        const ativos = await this.listAtivoUseCase.execute(idClienteLogado)
+        return ativos.map(ativo => AtivoMapper.toHttp(ativo))
+    }
+
+    @Patch(':id/status')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({
+        summary: 'Alternar status do ativo',
+        description: 'Ativa um veículo inativo ou inativa um veículo ativo (Toggle).'
+    })
+    @ApiOkResponse({ description: 'Status do ativo alterado com sucesso.' })
+    @ApiNotFoundResponse({ description: 'Ativo não encontrado.' })
+    async alternarStatus(
+        @Param('id', ParseIntPipe) id: number,
+    ) {
+        const ativoAtualizado = await this.toggleAtivoStatusUseCase.execute(id)
+
+        return AtivoMapper.toHttp(ativoAtualizado)
     }
 }

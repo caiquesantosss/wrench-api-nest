@@ -78,29 +78,28 @@ export class Ativo {
     observacoes?: string | null
   ): Ativo {
     return new Ativo(
-      id_cliente, descricao, tipo, ativo, data_cadastro, 
+      id_cliente, descricao, tipo, ativo, data_cadastro,
       marca, modelo, identificacao, observacoes, id_ativo
     )
   }
 
-
-  public inativate(): void {
-    if (!this._ativo) throw new Error('Este ativo já está inativo.')
-    this._ativo = false
+  public toggleStatus(): void {
+    this._ativo = !this._ativo
   }
 
+
   public updateDetails(
-    descricao: string, 
-    tipo: string, 
-    marca?: string | null, 
-    modelo?: string | null, 
-    identificacao?: string | null, 
+    descricao: string,
+    tipo: string,
+    marca?: string | null,
+    modelo?: string | null,
+    identificacao?: string | null,
     observacoes?: string | null
   ): void {
     if (!this._ativo) throw new Error('Não é possível alterar um ativo inativado.')
     if (!descricao || descricao.trim().length === 0) throw new Error('A descrição é obrigatória.')
     if (!tipo || tipo.trim().length === 0) throw new Error('O tipo é obrigatório.')
-    
+
     this._descricao = descricao
     this._tipo = tipo
     this._marca = marca
