@@ -8,7 +8,8 @@ import {
     UseGuards,
     Param,
     ParseIntPipe,
-    Patch
+    Patch,
+    Put
 } from '@nestjs/common'
 import {
     ApiTags,
@@ -19,19 +20,23 @@ import {
     ApiBody,
     ApiOkResponse,
     ApiNotFoundResponse,
+    ApiParam, 
+    ApiBadRequestResponse
 } from '@nestjs/swagger'
 
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth-guard'
 import { ZodValidationPipe } from '../../shared/pipes/zod-validation-pipe'
 
+import { LoggedUser } from '../../shared/decorators/logged-user-decorator'
 import { CreateAtivoDTO, createAtivoSchema } from '../application/dtos/create-ativo.dto'
+import { UpdateAtivoDTO, updateAtivoSchema } from '../application/dtos/update-details-ativo.dto'
 import { AtivoMapper } from './mappers/ativo.mapper'
 
 import { CreateAtivoUseCase } from '../application/use-cases/create-ativo-use-case'
 import { FindAtivoUseCase } from '../application/use-cases/find-ativo-use-case'
 import { ListAtivoUseCase } from '../application/use-cases/list-ativo-use-case'
-import { LoggedUser } from '../../shared/decorators/logged-user-decorator'
 import { ToggleAtivoStatusUseCase } from '../application/use-cases/toggle-ativo-status-use-case'
+import { UpdateDetailsAtivoUseCase } from '../application/use-cases/update-details-ativo-use-case'
 
 @ApiTags('Ativos')
 @ApiBearerAuth('JWT-auth')
@@ -42,7 +47,8 @@ export class AtivoController {
         private readonly createAtivoUseCase: CreateAtivoUseCase,
         private readonly findAtivoUseCase: FindAtivoUseCase,
         private readonly listAtivoUseCase: ListAtivoUseCase,
-        private readonly toggleAtivoStatusUseCase: ToggleAtivoStatusUseCase
+        private readonly toggleAtivoStatusUseCase: ToggleAtivoStatusUseCase, 
+        private readonly updateDetailsAtivoUseCase: UpdateDetailsAtivoUseCase
     ) { }
 
     @Post()
@@ -121,4 +127,68 @@ export class AtivoController {
 
         return AtivoMapper.toHttp(ativoAtualizado)
     }
+
+    @Put(':id')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({
+        summary: 'Atualizar os detalhes de um ativo',
+        description:
+            'Atualiza os dados cadastrais de um ativo existente, incluindo descrição, tipo, marca, modelo, identificação e observações.',
+    })
+    @ApiParam({
+        name: 'id',
+        type: Number,
+        description: 'Identificador único do ativo.',
+        example: 1,
+    })
+    @ApiBody({
+        description: 'Dados para atualização do ativo.',
+        schema: {
+            example: {
+                descricao: 'Compressor industrial',
+                tipo: 'MAQUINA',
+                marca: 'Schulz',
+                modelo: 'SRP 3030',
+                identificacao: 'COMP-001',
+                observacoes: 'Equipamento revisado e em boas condições.',
+            },
+        },
+    })
+    @ApiOkResponse({
+        description: 'Ativo atualizado com sucesso.',
+        schema: {
+            example: {
+                id_ativo: 1,
+                id_cliente: 2,
+                descricao: 'Compressor industrial',
+                tipo: 'MAQUINA',
+                marca: 'Schulz',
+                modelo: 'SRP 3030',
+                identificacao: 'COMP-001',
+                observacoes: 'Equipamento revisado e em boas condições.',
+                ativo: true,
+                data_cadastro: '2026-10-26T10:30:00.000Z',
+            },
+        },
+    })
+    @ApiNotFoundResponse({
+        description: 'Nenhum ativo foi encontrado com o identificador informado.',
+    })
+    @ApiConflictResponse({
+        description: 'Já existe outro ativo cadastrado com essa identificação.',
+    })
+    @ApiBadRequestResponse({
+        description: 'Dados inválidos ou identificador em formato incorreto.',
+    })
+    async atualizar(
+        @Param('id', ParseIntPipe) id: number,
+        @Body(new ZodValidationPipe(updateAtivoSchema))
+        body: UpdateAtivoDTO,
+    ) {
+        const ativoAtualizado =
+            await this.updateDetailsAtivoUseCase.execute(id, body)
+
+        return AtivoMapper.toHttp(ativoAtualizado)
+    }
+
 }
