@@ -5,29 +5,34 @@ import { ClientRepository } from "../../domain/repositories/ClientRepository"
 
 @Injectable()
 export class PrismaClientRepository implements ClientRepository {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+        private readonly prisma: PrismaService
+    ) {}
 
-    async saveCLient(cliente: Cliente): Promise<Cliente> {
-        const datas = {
+    async saveClient(cliente: Cliente): Promise<Cliente> {
+        const data = {
             nome: cliente.nome,
             documento: cliente.documento,
-            telefone: cliente.telefone,
-            email: cliente.email,
-            endereco: cliente.endereco,
+            telefone: cliente.telefone ?? null,
+            email: cliente.email ?? null,
+            endereco: cliente.endereco ?? null,
             ativo: cliente.ativo,
+            data_cadstro: cliente.data_cadastro
         }
 
         if (cliente.id_cliente) {
             const updatedClient = await this.prisma.cliente.update({
-                where: { id_cliente: cliente.id_cliente },
-                data: datas,
+                where: {
+                    id_cliente: cliente.id_cliente,
+                },
+                data,
             })
 
             return this.mapToClientDomain(updatedClient)
         }
 
         const createdClient = await this.prisma.cliente.create({
-            data: datas,
+            data,
         })
 
         return this.mapToClientDomain(createdClient)
@@ -36,36 +41,65 @@ export class PrismaClientRepository implements ClientRepository {
     async findClientByDocument(
         documento: string,
     ): Promise<Cliente | null> {
-        const prismaClient = await this.prisma.cliente.findUnique({
-            where: { documento },
+        const clientData = await this.prisma.cliente.findUnique({
+            where: {
+                documento,
+            },
         })
 
-        if (!prismaClient) {
+        if (!clientData) {
             return null
         }
 
-        return this.mapToClientDomain(prismaClient)
+        return this.mapToClientDomain(clientData)
     }
 
-    async findClientById(id: number): Promise<Cliente | null> {
-        const prismaClient = await this.prisma.cliente.findUnique({
-            where: { id_cliente: id },
+    async findClientById(
+        id: number,
+    ): Promise<Cliente | null> {
+        const clientData = await this.prisma.cliente.findUnique({
+            where: {
+                id_cliente: id,
+            },
         })
 
-        if (!prismaClient) {
+        if (!clientData) {
             return null
         }
 
-        return this.mapToClientDomain(prismaClient)
+        return this.mapToClientDomain(clientData)
     }
 
-    private mapToClientDomain(data: any): Cliente {
+    async listAll(): Promise<Cliente[]> {
+        const clientsData = await this.prisma.cliente.findMany({
+            orderBy: {
+                nome: "asc",
+            },
+        })
+
+        return clientsData.map((client) =>
+            this.mapToClientDomain(client)
+        )
+    }
+
+
+    private mapToClientDomain(data: {
+        id_cliente: number
+        nome: string
+        documento: string
+        telefone: string | null
+        email: string | null
+        endereco: string | null
+        ativo: boolean
+        data_cadastro: Date
+    }): Cliente {
         return Cliente.recover(
             data.id_cliente,
             data.nome,
             data.documento,
             data.ativo,
-            data.telefone,
+            data.data_cadastro,
+            data.telefone ?? undefined,
             data.email,
             data.endereco,
         )
