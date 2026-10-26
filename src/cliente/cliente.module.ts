@@ -4,6 +4,8 @@ import { PrismaClientRepository } from './infrastructure/database/PrismaClientRe
 import { CreateClientUseCase } from './application/use-cases/create-client-use-case'
 
 import { UsuarioModule } from '../usuario/usuario.module'
+import { FindCLientById } from './application/use-cases/find-client-by-id-use-case'
+import { ListAllClientsUseCase } from './application/use-cases/list-all-clients-use-case'
 
 @Module({
   imports: [UsuarioModule], 
@@ -14,6 +16,8 @@ import { UsuarioModule } from '../usuario/usuario.module'
       useClass: PrismaClientRepository, 
     },
     CreateClientUseCase,
+    FindCLientById, 
+    ListAllClientsUseCase
   ],
 
   exports: ['ClientRepository'],

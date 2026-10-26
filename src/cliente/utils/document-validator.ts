@@ -4,7 +4,7 @@ export function isValidCPF(cpf: string): boolean {
 
   const calculateDigit = (factor: number) => {
     let total = 0
-    for (let i = 0 i < factor - 1 i++) {
+    for (let i = 0; i < factor - 1; i++) {
       total += parseInt(cpf.charAt(i)) * (factor - i)
     }
     const rest = total % 11
@@ -23,7 +23,7 @@ export function isValidCNPJ(cnpj: string): boolean {
 
   const calculateDigit = (length: number, weights: number[]) => {
     let total = 0
-    for (let i = 0 i < length i++) {
+    for (let i = 0; i < length; i++) {
       total += parseInt(cnpj.charAt(i)) * weights[i]
     }
     const rest = total % 11
