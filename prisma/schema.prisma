@@ -10,7 +10,7 @@ datasource db {
 model Cliente {
   id_cliente    Int            @id @default(autoincrement())
   nome          String         @db.VarChar(150)
-  documento     String         @unique @db.VarChar(20)
+  documento     String         @unique @db.VarChar(14)
   telefone      String?        @db.VarChar(20)
   email         String?        @db.VarChar(100)
   endereco      String?        @db.VarChar(255)

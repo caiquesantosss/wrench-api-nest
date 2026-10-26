@@ -1,7 +1,7 @@
 import { Cliente } from "../entities/Cliente"
 
 export interface ClientRepository {
-    saveClient(cliente: Cliente): Promise<Cliente>
+    save(cliente: Cliente): Promise<Cliente>
     findClientByDocument(documento: string): Promise<Cliente | null>
     findClientById(id: number): Promise<Cliente | null>
     listAll(): Promise<Cliente[]>

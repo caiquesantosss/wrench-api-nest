@@ -4,7 +4,7 @@ import {
     Injectable,
 } from "@nestjs/common"
 import { ClientRepository } from "../../domain/repositories/ClientRepository"
-import { CreateClientDto } from "../dtos/create-client.dto"
+import { CreateClientDTO } from "../dtos/create-client.dto"
 import { Cliente } from "../../domain/entities/Cliente"
 
 @Injectable()
@@ -14,7 +14,7 @@ export class CreateClientUseCase {
         private readonly clientRepository: ClientRepository,
     ) { }
 
-    async execute(data: CreateClientDto): Promise<Cliente> {
+    async execute(data: CreateClientDTO): Promise<Cliente> {
         const existingClient =
             await this.clientRepository.findClientByDocument(
                 data.documento,
@@ -34,6 +34,6 @@ export class CreateClientUseCase {
             data.endereco,
         )
 
-        return this.clientRepository.saveClient(newClient)
+        return this.clientRepository.save(newClient)
     }
 }

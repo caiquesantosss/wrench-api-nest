@@ -9,6 +9,7 @@ import {
     HttpStatus,
     Param,
     ParseIntPipe,
+    Patch
 } from '@nestjs/common'
 
 import {
@@ -28,11 +29,12 @@ import { ZodValidationPipe } from '../../shared/pipes/zod-validation-pipe'
 import { CreateClientUseCase } from '../application/use-cases/create-client-use-case'
 import {
     createClientSchema,
-    CreateClientDto,
+    CreateClientDTO,
 } from '../application/dtos/create-client.dto'
 import { ListAllClientsUseCase } from '../application/use-cases/list-all-clients-use-case'
 import { FindCLientById } from '../application/use-cases/find-client-by-id-use-case'
 import { ClienteMapper } from './mappers/cliente.mapper'
+import { UpdateClientUseCase } from '../application/use-cases/update-client-use-case'
 
 @ApiTags('Clientes e Ativos')
 @ApiBearerAuth('JWT-auth')
@@ -42,7 +44,8 @@ export class ClienteController {
     constructor(
         private readonly createClientUseCase: CreateClientUseCase,
         private readonly listAllClientsUseCase: ListAllClientsUseCase,
-        private readonly findCLientByIdUseCase: FindCLientById
+        private readonly findClientByIdUseCase: FindCLientById,
+        private readonly updateClientUseCase: UpdateClientUseCase
     ) { }
 
     @Post()
@@ -95,7 +98,7 @@ export class ClienteController {
         description: 'Dados inválidos ou documento já cadastrado.',
     })
     @UsePipes(new ZodValidationPipe(createClientSchema))
-    async cadastrarCliente(@Body() body: CreateClientDto) {
+    async cadastrarCliente(@Body() body: CreateClientDTO) {
         return this.createClientUseCase.execute(body)
     }
 
@@ -176,7 +179,83 @@ export class ClienteController {
     async buscarPorId(
         @Param('id', ParseIntPipe) id: number,
     ) {
-        const cliente = await this.findCLientByIdUseCase.execute(id)
+        const cliente = await this.findClientByIdUseCase.execute(id)
+
+        return ClienteMapper.toHttp(cliente)
+    }
+
+
+    @Patch(':id')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({
+        summary: 'Atualizar os dados de um cliente',
+        description: 'Atualiza nome, documento, telefone, e-mail e endereço de um cliente cadastrado.',
+    })
+    @ApiParam({
+        name: 'id',
+        type: Number,
+        description: 'Identificador único do cliente.',
+        example: 1,
+    })
+    @ApiBody({
+        description: 'Dados para atualização do cliente.',
+        schema: {
+            type: 'object',
+            properties: {
+                nome: {
+                    type: 'string',
+                    example: 'Maria Antonia da Silva',
+                },
+                documento: {
+                    type: 'string',
+                    example: '52998224725',
+                },
+                telefone: {
+                    type: 'string',
+                    example: '11987654321',
+                },
+                email: {
+                    type: 'string',
+                    example: 'maria.silva@email.com',
+                },
+                endereco: {
+                    type: 'string',
+                    example: 'Avenida Paulista, 1000',
+                },
+            },
+            required: ['nome', 'documento'],
+        },
+    })
+    @ApiOkResponse({
+        description: 'Cliente atualizado com sucesso.',
+        schema: {
+            example: {
+                id_cliente: 1,
+                nome: 'Maria Antonia da Silva',
+                documento: '52998224725',
+                telefone: '11987654321',
+                email: 'maria.silva@email.com',
+                endereco: 'Avenida Paulista, 1000',
+                ativo: true,
+                data_cadastro: '2026-10-26T18:00:00.000Z',
+            },
+        },
+    })
+    @ApiNotFoundResponse({
+        description: 'Cliente não encontrado para o identificador informado.',
+        schema: {
+            example: {
+                statusCode: 404,
+                message: 'Cliente não foi encontrado.',
+                error: 'Not Found',
+            },
+        },
+    })
+    async atualizarCliente(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() body: CreateClientDTO,
+    ) {
+        const cliente = await this.updateClientUseCase.execute(id, body)
 
         return ClienteMapper.toHttp(cliente)
     }

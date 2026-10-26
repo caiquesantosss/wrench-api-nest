@@ -82,12 +82,7 @@ export class Cliente {
     ): void {
         const cleanDocument = documento.replace(/\D/g, '')
 
-        const updatedData = {
-            nome,
-            documento: cleanDocument,
-        }
-
-        this.StateValidation(updatedData.nome, updatedData.documento)
+        this.StateValidation(nome, cleanDocument)
 
         this._nome = nome
         this._documento = cleanDocument
@@ -127,16 +122,41 @@ export class Cliente {
         const cleanDocument = documento.replace(/\D/g, '')
 
         if (cleanDocument.length !== 11 && cleanDocument.length !== 14) {
-            throw new Error('Invalid document. It must be a CPF (11 digits) or CNPJ (14 digits).')
+            throw new Error(
+                'Invalid document. It must be a CPF (11 digits) or CNPJ (14 digits).'
+            )
         }
     }
 
-    get id_cliente() { return this._id_cliente }
-    get nome() { return this._nome }
-    get documento() { return this._documento }
-    get telefone() { return this._telefone }
-    get email() { return this._email }
-    get endereco() { return this._endereco }
-    get ativo() { return this._ativo }
-    get data_cadastro() { return this._data_cadastro }
+    get id_cliente() {
+        return this._id_cliente
+    }
+
+    get nome() {
+        return this._nome
+    }
+
+    get documento() {
+        return this._documento
+    }
+
+    get telefone() {
+        return this._telefone
+    }
+
+    get email() {
+        return this._email
+    }
+
+    get endereco() {
+        return this._endereco
+    }
+
+    get ativo() {
+        return this._ativo
+    }
+
+    get data_cadastro() {
+        return this._data_cadastro
+    }
 }

@@ -17,4 +17,4 @@ export const createClientSchema = z.object({
     endereco: z.string().optional(),
 })
 
-export type CreateClientDto = z.infer<typeof createClientSchema>
+export type CreateClientDTO = z.infer<typeof createClientSchema>

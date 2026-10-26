@@ -6,6 +6,7 @@ import { CreateClientUseCase } from './application/use-cases/create-client-use-c
 import { UsuarioModule } from '../usuario/usuario.module'
 import { FindCLientById } from './application/use-cases/find-client-by-id-use-case'
 import { ListAllClientsUseCase } from './application/use-cases/list-all-clients-use-case'
+import { UpdateClientUseCase } from './application/use-cases/update-client-use-case'
 
 @Module({
   imports: [UsuarioModule], 
@@ -17,7 +18,8 @@ import { ListAllClientsUseCase } from './application/use-cases/list-all-clients-
     },
     CreateClientUseCase,
     FindCLientById, 
-    ListAllClientsUseCase
+    ListAllClientsUseCase,
+    UpdateClientUseCase
   ],
 
   exports: ['ClientRepository'],

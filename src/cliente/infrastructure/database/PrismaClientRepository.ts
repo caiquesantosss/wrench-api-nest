@@ -9,7 +9,7 @@ export class PrismaClientRepository implements ClientRepository {
         private readonly prisma: PrismaService
     ) {}
 
-    async saveClient(cliente: Cliente): Promise<Cliente> {
+    async save(cliente: Cliente): Promise<Cliente> {
         const data = {
             nome: cliente.nome,
             documento: cliente.documento,
@@ -17,7 +17,7 @@ export class PrismaClientRepository implements ClientRepository {
             email: cliente.email ?? null,
             endereco: cliente.endereco ?? null,
             ativo: cliente.ativo,
-            data_cadstro: cliente.data_cadastro
+            data_cadastro: cliente.data_cadastro
         }
 
         if (cliente.id_cliente) {
