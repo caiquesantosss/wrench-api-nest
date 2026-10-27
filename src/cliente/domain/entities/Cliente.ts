@@ -91,21 +91,10 @@ export class Cliente {
         this._endereco = endereco
     }
 
-    public deactivate(): void {
-        if (!this._ativo) {
-            throw new Error('Client is already inactive.')
-        }
-
-        this._ativo = false
+    public toggleStatus(): void {
+        this._ativo = !this._ativo
     }
 
-    public activate(): void {
-        if (this._ativo) {
-            throw new Error('Client is already active.')
-        }
-
-        this._ativo = true
-    }
 
     private StateValidation(
         nome: string = this._nome,

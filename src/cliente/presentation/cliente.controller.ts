@@ -25,18 +25,19 @@ import {
 
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth-guard'
 import { ZodValidationPipe } from '../../shared/pipes/zod-validation-pipe'
-
-import { CreateClientUseCase } from '../application/use-cases/create-client-use-case'
+import { ClienteMapper } from './mappers/cliente.mapper'
 import {
     createClientSchema,
     CreateClientDTO,
 } from '../application/dtos/create-client.dto'
+
+import { CreateClientUseCase } from '../application/use-cases/create-client-use-case'
 import { ListAllClientsUseCase } from '../application/use-cases/list-all-clients-use-case'
 import { FindCLientById } from '../application/use-cases/find-client-by-id-use-case'
-import { ClienteMapper } from './mappers/cliente.mapper'
 import { UpdateClientUseCase } from '../application/use-cases/update-client-use-case'
+import { ToggleStatusClientUseCase } from '../application/use-cases/toggle-status-client-use-case'
 
-@ApiTags('Clientes e Ativos')
+@ApiTags('Clientes')
 @ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard)
 @Controller('clientes')
@@ -45,7 +46,8 @@ export class ClienteController {
         private readonly createClientUseCase: CreateClientUseCase,
         private readonly listAllClientsUseCase: ListAllClientsUseCase,
         private readonly findClientByIdUseCase: FindCLientById,
-        private readonly updateClientUseCase: UpdateClientUseCase
+        private readonly updateClientUseCase: UpdateClientUseCase, 
+        private readonly toggleStatusClientUseCase: ToggleStatusClientUseCase
     ) { }
 
     @Post()
@@ -256,6 +258,52 @@ export class ClienteController {
         @Body() body: CreateClientDTO,
     ) {
         const cliente = await this.updateClientUseCase.execute(id, body)
+
+        return ClienteMapper.toHttp(cliente)
+    }
+
+    @Patch(':id/status')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({
+        summary: 'Ativar ou desativar um cliente',
+        description:
+            'Alterna o status do cliente. Se estiver ativo, será desativado; se estiver inativo, será ativado.',
+    })
+    @ApiParam({
+        name: 'id',
+        type: Number,
+        description: 'Identificador único do cliente.',
+        example: 1,
+    })
+    @ApiOkResponse({
+        description: 'Status do cliente alterado com sucesso.',
+        schema: {
+            example: {
+                id_cliente: 1,
+                nome: 'Maria Antonia',
+                telefone: '11987654321',
+                email: 'maria@email.com',
+                documento: '12345678909',
+                endereco: 'Rua das Flores, 123',
+                ativo: false,
+                data_cadastro: '2026-10-26T18:00:00.000Z',
+            },
+        },
+    })
+    @ApiNotFoundResponse({
+        description: 'Cliente não encontrado para o identificador informado.',
+        schema: {
+            example: {
+                statusCode: 404,
+                message: 'Não foi possível encontrar um ativo.',
+                error: 'Not Found',
+            },
+        },
+    })
+    async alternarStatusCliente(
+        @Param('id', ParseIntPipe) id: number,
+    ) {
+        const cliente = await this.toggleStatusClientUseCase.execute(id)
 
         return ClienteMapper.toHttp(cliente)
     }
