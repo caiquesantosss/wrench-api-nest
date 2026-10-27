@@ -8,6 +8,7 @@ import { ClienteModule } from './cliente/cliente.module'
 import { OrdemServicoModule } from './ordem-servico/ordem-servico.module'
 import { CatalogoItemModule } from './catalogo-item/catalogo-item.module'
 import { AtivoModule } from './ativo/ativo.module'
+import { FinanceiroModule } from './financeiro/financeiro.module';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule()
 
@@ -24,6 +25,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule()
     OrdemServicoModule,
     CatalogoItemModule,
     AtivoModule,
+    FinanceiroModule,
   ],
   controllers: [AppController],
   providers: [AppService],
