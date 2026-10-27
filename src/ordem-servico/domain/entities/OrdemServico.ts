@@ -175,6 +175,10 @@ export class OrdemServico {
             )
         }
 
+        if (this._itens.length === 0) {
+            this._status = "ORCAMENTO_PENDENTE"
+        }
+
         this.recalculateTotals()
     }
 
@@ -207,7 +211,10 @@ export class OrdemServico {
         this.updateDate()
     }
 
-    public setBudget(dataPrevisao?: Date): void {
+    public setBudget(
+        valorMaoObra: number,
+        dataPrevisao?: Date
+    ): void {
         this.checkIfFrozen()
 
         if (this._status !== 'ORCAMENTO_PENDENTE') {
@@ -222,16 +229,27 @@ export class OrdemServico {
             )
         }
 
+        if (valorMaoObra < 0) {
+            throw new Error(
+                'O valor da mão de obra não pode ser negativo.'
+            )
+        }
+
+        this._valor_mao_obra = valorMaoObra
+
+        this._valor_total = this._valor_pecas + this._valor_mao_obra
+
         if (dataPrevisao) {
             this._data_previsao = dataPrevisao
         }
 
         this._status = 'AGUARDANDO_APROVACAO'
         this.updateDate()
+
     }
 
     public cancelItem(): void {
-        this.checkIfFrozen() 
+        this.checkIfFrozen()
 
         this._status = 'CANCELADA'
         this.updateDate()

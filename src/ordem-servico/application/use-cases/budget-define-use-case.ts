@@ -24,7 +24,7 @@ export class BudgetDefineUseCase {
             dataPrevista = new Date(data.data_previsao)
         }
 
-        os.setBudget(dataPrevista)
+        os.setBudget(data.valor_mao_obra, dataPrevista)
 
 
         return await this.osRepository.save(os)

@@ -169,7 +169,7 @@ export class OrdemServicoController {
     @ApiBearerAuth('JWT-auth')
     @ApiOperation({
         summary: 'Definir orçamento da ordem de serviço',
-        description: 'Registra os valores de mão de obra e peças e avança a ordem de serviço para AGUARDANDO_APROVACAO.'
+        description: 'Registra os valores de mão de obra e avança a ordem de serviço para AGUARDANDO_APROVACAO.'
     })
     @ApiParam({
         name: 'id',
@@ -178,22 +178,16 @@ export class OrdemServicoController {
         example: 1
     })
     @ApiBody({
-        description: 'Valores que compõem o orçamento da ordem de serviço',
+        description: 'Valor da mão de obra do serviço executado',
         schema: {
             type: 'object',
-            required: ['valor_mao_obra', 'valor_pecas'],
+            required: ['valor_mao_obra'],
             properties: {
                 valor_mao_obra: {
                     type: 'number',
                     example: 250.00,
                     minimum: 0,
                     description: 'Valor da mão de obra'
-                },
-                valor_pecas: {
-                    type: 'number',
-                    example: 180.50,
-                    minimum: 0,
-                    description: 'Valor total das peças'
                 }
             }
         }
