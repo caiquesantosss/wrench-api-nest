@@ -5,6 +5,7 @@ import { OrdemServicoModule } from '../ordem-servico/ordem-servico.module'
 import { FinanceiroController } from './presentation/financeiro.controller'
 import { PrismaFinanceiroRepository } from './infrastructure/database/PrismaFinanceiroRepository'
 import { GenerateOSChargeUseCase } from './application/use-cases/generate-os-charge-use-case'
+import { ListPendingOsChargeUseCase } from './application/use-cases/list-pending-os-charge-use-case'
 
 @Module({
     imports: [
@@ -20,6 +21,7 @@ import { GenerateOSChargeUseCase } from './application/use-cases/generate-os-cha
             useClass: PrismaFinanceiroRepository,
         },
         GenerateOSChargeUseCase,
+        ListPendingOsChargeUseCase
     ],
     exports: [
         'FinanceiroRepository',

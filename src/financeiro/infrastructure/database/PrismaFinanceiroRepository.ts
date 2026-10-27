@@ -80,11 +80,8 @@ export class PrismaFinanceiroRepository implements FinanceiroRepository {
         )
     }
 
-    async listPending(): Promise<LancamentoFinanceiro[]> {
+    async listAll(): Promise<LancamentoFinanceiro[]> {
         const lancamentosDb = await this.prisma.financeiro.findMany({
-            where: {
-                status_pagamento: 'PENDENTE',
-            },
             orderBy: {
                 data_cadastro: 'asc',
             },

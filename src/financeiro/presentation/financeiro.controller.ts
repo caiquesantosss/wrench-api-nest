@@ -6,6 +6,7 @@ import {
     HttpCode,
     HttpStatus,
     UseGuards,
+    Get,
 } from '@nestjs/common'
 import {
     ApiTags,
@@ -17,10 +18,12 @@ import {
     ApiNotFoundResponse,
     ApiConflictResponse,
     ApiUnauthorizedResponse,
+    ApiOkResponse,
 } from '@nestjs/swagger'
 
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth-guard'
 import { GenerateOSChargeUseCase } from '../application/use-cases/generate-os-charge-use-case'
+import { ListPendingOsChargeUseCase } from '../application/use-cases/list-pending-os-charge-use-case'
 
 @ApiTags('Financeiro')
 @ApiBearerAuth('JWT-auth')
@@ -29,7 +32,8 @@ import { GenerateOSChargeUseCase } from '../application/use-cases/generate-os-ch
 export class FinanceiroController {
     constructor(
         private readonly generateOSChargeUseCase: GenerateOSChargeUseCase,
-    ) {}
+        private readonly listPendingOsChargeUseCase: ListPendingOsChargeUseCase
+    ) { }
 
     @Post('ordem-servico/:id/faturar')
     @HttpCode(HttpStatus.CREATED)
@@ -81,5 +85,39 @@ export class FinanceiroController {
         @Param('id', ParseIntPipe) idOrdemServico: number,
     ) {
         return this.generateOSChargeUseCase.execute(idOrdemServico)
+    }
+
+    @Get('cobrancas/pendentes')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({
+        summary: 'Listar cobranças pendentes',
+        description:
+            'Retorna os lançamentos financeiros que possuem status PENDENTE, ordenados pela data de cadastro.',
+    })
+    @ApiOkResponse({
+        description: 'Cobranças pendentes listadas com sucesso.',
+        schema: {
+            example: [
+                {
+                    id_financeiro: 1,
+                    id_ordem_servico: 10,
+                    descricao: 'Faturamento referente à ordem de serviço #10',
+                    tipo_lancamento: 'RECEITA',
+                    status_pagamento: 'PENDENTE',
+                    valor: 1500,
+                    forma_pagamento: null,
+                    referencia_externa: 'OS-10',
+                    data_vencimento: '2026-11-01T00:00:00.000Z',
+                    data_pagamento: null,
+                    data_cadastro: '2026-10-27T12:00:00.000Z',
+                },
+            ],
+        },
+    })
+    @ApiUnauthorizedResponse({
+        description: 'Token de autenticação ausente ou inválido.',
+    })
+    async listPending() {
+        return this.listPendingOsChargeUseCase.execute()
     }
 }
