@@ -15,17 +15,11 @@ export class BudgetDefineUseCase {
 
         if (!os) {
             throw new NotFoundException(
-                `Ordem de serviço com o ID ${id_os} não foi encontrada!`
+                `Ordem de serviço com o ID ${id_os} não foi encontrada.`
             )
         }
 
-        let dataPrevista: Date | undefined
-        if (data.data_previsao) {
-            dataPrevista = new Date(data.data_previsao)
-        }
-
-        os.setBudget(data.valor_mao_obra, dataPrevista)
-
+        os.setBudget(data.valor_mao_obra)
 
         return await this.osRepository.save(os)
     }

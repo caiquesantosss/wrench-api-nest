@@ -248,6 +248,25 @@ export class OrdemServico {
 
     }
 
+    public updateEstimatedCompletionDate(newDate: Date): void {
+        const today = new Date()
+
+        today.setHours(0, 0, 0, 0)
+
+        if (newDate < today) {
+            throw new Error('A nova data não pode estar no passado')
+        }
+
+        if (this._status === 'CONCLUIDA' || this._status === 'CANCELADA') {
+            throw new Error(
+                'Não é possível alterar a previsão de uma OS já finalizada.'
+            )
+        }
+
+        this._data_previsao = newDate
+
+    }
+
     public cancelItem(): void {
         this.checkIfFrozen()
 
@@ -344,4 +363,5 @@ export class OrdemServico {
     get items(): ItemOS[] {
         return [...this._itens]
     }
+
 }

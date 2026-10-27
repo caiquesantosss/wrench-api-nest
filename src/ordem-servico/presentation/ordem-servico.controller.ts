@@ -35,6 +35,7 @@ import { BudgetDefineDTO, budgetDefineSchema } from '../application/dtos/budget-
 import { FinishServiceDTO, finishServiceSchema } from '../application/dtos/finish-service.dto'
 import { AddItemOsDTO, addItemOsSchema } from '../application/dtos/add-item-os.dto'
 import { CompleteServiceOrderDto } from '../application/dtos/complete-service.dto'
+import { UpdateEstimateCompletionDateDTO, updateEstimateCompletionDateSchema } from '../application/dtos/update-estimate-completion-date.dto'
 
 import { OrdemServicoMapper } from './mappers/ordem-serico.mappers'
 
@@ -47,6 +48,7 @@ import { AddItemOsUseCase } from '../application/use-cases/add-item-os-use-case'
 import { RemoveItemOsUseCase } from '../application/use-cases/remove-item-os-use-case'
 import { CancelItemOsUseCase } from '../application/use-cases/cancel-item-os-use-case'
 import { CompleteServiceOrderUseCase } from '../application/use-cases/complete-service-order-use-case'
+import { UpdateEstimateCompletionUseCase } from '../application/use-cases/update-estimate-completion-date-use-case'
 
 @ApiTags('Ordem de Serviço')
 @ApiBearerAuth('JWT-auth')
@@ -61,8 +63,9 @@ export class OrdemServicoController {
         private readonly finishServiceUseCase: FinishServiceUseCase,
         private readonly addItemOsUseCase: AddItemOsUseCase,
         private readonly removeItemOsUseCase: RemoveItemOsUseCase,
-        private readonly cancelItemOsUseCase: CancelItemOsUseCase, 
-        private readonly completeServiceOrderUseCase: CompleteServiceOrderUseCase
+        private readonly cancelItemOsUseCase: CancelItemOsUseCase,
+        private readonly completeServiceOrderUseCase: CompleteServiceOrderUseCase,
+        private readonly updateEstimateCompletionDateUseCase: UpdateEstimateCompletionUseCase
     ) { }
 
     @Post()
@@ -215,6 +218,52 @@ export class OrdemServicoController {
 
         return OrdemServicoMapper.toHttp(osAtualizada)
     }
+
+    @Patch(':id_os/previsao-conclusao')
+    @ApiOperation({
+        summary: 'Atualizar a previsão de conclusão da ordem de serviço',
+    })
+    @ApiParam({
+        name: 'id_os',
+        description: 'ID da ordem de serviço',
+        type: Number,
+    })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                data_previsao: {
+                    type: 'string',
+                    format: 'date-time',
+                    example: '2026-11-10T18:00:00.000Z',
+                },
+            },
+            required: ['data_previsao'],
+        },
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Previsão de conclusão atualizada com sucesso.',
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Data inválida ou regra de negócio violada.',
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'Ordem de serviço não encontrada.',
+    })
+    async handle(
+        @Param('id_os', ParseIntPipe) id_os: number,
+        @Body(new ZodValidationPipe(updateEstimateCompletionDateSchema))
+        body: UpdateEstimateCompletionDateDTO,
+    ) {
+        return this.updateEstimateCompletionDateUseCase.execute(
+            id_os,
+            body.data_previsao,
+        )
+    }
+
 
     @Patch(':id/iniciar-execucao')
     @ApiBearerAuth('JWT-auth')
