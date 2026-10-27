@@ -4,15 +4,18 @@ export type StatusPagamento =
     | 'CANCELADO'
     | 'ATRASADO'
 
+export type TipoLancamento =
+    | 'RECEITA'
+    | 'DESPESA'
+
 export type MetodoPagamento =
     | 'PIX'
     | 'CARTAO_CREDITO'
     | 'CARTAO_DEBITO'
     | 'DINHEIRO'
     | 'BOLETO'
+    | 'TRANSFERENCIA'
     | null
-
-export type TipoLancamento = string
 
 export class LancamentoFinanceiro {
     private _id_financeiro?: number
@@ -23,24 +26,27 @@ export class LancamentoFinanceiro {
     private _valor: number
     private _forma_pagamento?: MetodoPagamento
     private _referencia_externa?: string | null
-    private _data_vencimento: Date
+    private _data_vencimento?: Date | null
     private _data_pagamento?: Date | null
-    private _data_cadastro?: Date
+    private _data_cadastro: Date
 
     private constructor(
+        id_ordem_servico: number,
         descricao: string,
         tipo_lancamento: TipoLancamento,
         valor: number,
-        data_vencimento: Date,
-        id_ordem_servico: number,
         status_pagamento: StatusPagamento = 'PENDENTE',
+        data_vencimento?: Date | null,
         forma_pagamento?: MetodoPagamento,
         referencia_externa?: string | null,
         data_pagamento?: Date | null,
-        data_cadastro?: Date,
+        data_cadastro: Date = new Date(),
         id_financeiro?: number
     ) {
-        if (!Number.isInteger(id_ordem_servico) || id_ordem_servico <= 0) {
+        if (
+            !Number.isInteger(id_ordem_servico) ||
+            id_ordem_servico <= 0
+        ) {
             throw new Error(
                 'É obrigatório informar uma ordem de serviço válida.'
             )
@@ -56,8 +62,8 @@ export class LancamentoFinanceiro {
         this._descricao = descricao
         this._tipo_lancamento = tipo_lancamento
         this._valor = valor
-        this._data_vencimento = data_vencimento
         this._status_pagamento = status_pagamento
+        this._data_vencimento = data_vencimento
         this._forma_pagamento = forma_pagamento
         this._referencia_externa = referencia_externa
         this._data_pagamento = data_pagamento
@@ -66,41 +72,44 @@ export class LancamentoFinanceiro {
     }
 
     public static create(
+        id_ordem_servico: number,
         descricao: string,
-        tipo_lancamento: TipoLancamento,
         valor: number,
-        data_vencimento: Date,
-        id_ordem_servico: number
+        data_vencimento?: Date | null,
+        referencia_externa?: string | null
     ): LancamentoFinanceiro {
         return new LancamentoFinanceiro(
+            id_ordem_servico,
             descricao,
-            tipo_lancamento,
+            'RECEITA',
             valor,
+            'PENDENTE',
             data_vencimento,
-            id_ordem_servico
+            null,
+            referencia_externa
         )
     }
 
     public static recover(
         id_financeiro: number,
+        id_ordem_servico: number,
         descricao: string,
         tipo_lancamento: TipoLancamento,
         status_pagamento: StatusPagamento,
         valor: number,
         forma_pagamento: MetodoPagamento,
         referencia_externa: string | null,
-        data_vencimento: Date,
+        data_vencimento: Date | null,
         data_pagamento: Date | null,
-        data_cadastro: Date,
-        id_ordem_servico: number
+        data_cadastro: Date
     ): LancamentoFinanceiro {
         return new LancamentoFinanceiro(
+            id_ordem_servico,
             descricao,
             tipo_lancamento,
             valor,
-            data_vencimento,
-            id_ordem_servico,
             status_pagamento,
+            data_vencimento,
             forma_pagamento,
             referencia_externa,
             data_pagamento,
@@ -127,7 +136,7 @@ export class LancamentoFinanceiro {
 
         if (!metodo) {
             throw new Error(
-                'É obrigatório informar o método de pagamento.'
+                'É obrigatório informar a forma de pagamento.'
             )
         }
 

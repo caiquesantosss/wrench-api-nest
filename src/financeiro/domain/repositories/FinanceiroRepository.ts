@@ -1,3 +1,4 @@
+import { OrdemServico } from "../../../generated/prisma/client";
 import { LancamentoFinanceiro } from "../entities/LancamentoFinanceiro";
 
 export interface FinanceiroRepository {

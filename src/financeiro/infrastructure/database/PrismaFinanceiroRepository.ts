@@ -4,6 +4,7 @@ import { FinanceiroRepository } from '../../domain/repositories/FinanceiroReposi
 import {
     LancamentoFinanceiro,
     StatusPagamento,
+    TipoLancamento,
     MetodoPagamento,
 } from '../../domain/entities/LancamentoFinanceiro'
 import { Prisma } from '../../../generated/prisma/client'
@@ -13,7 +14,7 @@ export class PrismaFinanceiroRepository implements FinanceiroRepository {
     constructor(
         @Inject(PrismaService)
         private readonly prisma: Prisma.TransactionClient
-    ) { }
+    ) {}
 
     async save(
         lancamento: LancamentoFinanceiro
@@ -26,20 +27,20 @@ export class PrismaFinanceiroRepository implements FinanceiroRepository {
             valor: lancamento.valor,
             forma_pagamento: lancamento.forma_pagamento ?? null,
             referencia_externa: lancamento.referencia_externa ?? null,
-            data_vencimento: lancamento.data_vencimento,
+            data_vencimento: lancamento.data_vencimento ?? null,
             data_pagamento: lancamento.data_pagamento ?? null,
         }
 
         const lancamentoSalvo = lancamento.id_financeiro
             ? await this.prisma.financeiro.update({
-                where: {
-                    id_financeiro: lancamento.id_financeiro,
-                },
-                data,
-            })
+                  where: {
+                      id_financeiro: lancamento.id_financeiro,
+                  },
+                  data,
+              })
             : await this.prisma.financeiro.create({
-                data,
-            })
+                  data,
+              })
 
         return this.mapToDomain(lancamentoSalvo)
     }
@@ -85,7 +86,7 @@ export class PrismaFinanceiroRepository implements FinanceiroRepository {
                 status_pagamento: 'PENDENTE',
             },
             orderBy: {
-                data_vencimento: 'asc',
+                data_cadastro: 'asc',
             },
         })
 
@@ -113,16 +114,16 @@ export class PrismaFinanceiroRepository implements FinanceiroRepository {
     private mapToDomain(raw: any): LancamentoFinanceiro {
         return LancamentoFinanceiro.recover(
             raw.id_financeiro,
+            raw.id_ordem_servico,
             raw.descricao,
-            raw.tipo_lancamento,
+            raw.tipo_lancamento as TipoLancamento,
             raw.status_pagamento as StatusPagamento,
             Number(raw.valor),
             raw.forma_pagamento as MetodoPagamento,
             raw.referencia_externa,
             raw.data_vencimento,
             raw.data_pagamento,
-            raw.data_cadastro,
-            raw.id_ordem_servico
+            raw.data_cadastro
         )
     }
 }

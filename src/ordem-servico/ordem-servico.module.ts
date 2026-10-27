@@ -24,6 +24,7 @@ import { UpdateEstimateCompletionUseCase } from './application/use-cases/update-
     ClienteModule, 
     CatalogoItemModule
   ],
+  exports: ['OrdemServicoRepository'],
   controllers: [OrdemServicoController],
   providers: [
     {
