@@ -7,6 +7,8 @@ import {
     HttpStatus,
     UseGuards,
     Get,
+    Body,
+    Patch,
 } from '@nestjs/common'
 import {
     ApiTags,
@@ -19,11 +21,15 @@ import {
     ApiConflictResponse,
     ApiUnauthorizedResponse,
     ApiOkResponse,
+    ApiBody,
 } from '@nestjs/swagger'
-
+import { PaymentRegisterDTO, PaymentRegisterSchema } from '../application/dtos/payment-register.dto'
+import { ZodValidationPipe } from '../../shared/pipes/zod-validation-pipe'
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth-guard'
+
+import { ListPendingOsChargeUseCase } from '../application/use-cases/list-all-os-charge-use-case'
 import { GenerateOSChargeUseCase } from '../application/use-cases/generate-os-charge-use-case'
-import { ListPendingOsChargeUseCase } from '../application/use-cases/list-pending-os-charge-use-case'
+import { RegisterPaymentUseCase } from '../application/use-cases/register-payment-use-case'
 
 @ApiTags('Financeiro')
 @ApiBearerAuth('JWT-auth')
@@ -32,7 +38,8 @@ import { ListPendingOsChargeUseCase } from '../application/use-cases/list-pendin
 export class FinanceiroController {
     constructor(
         private readonly generateOSChargeUseCase: GenerateOSChargeUseCase,
-        private readonly listPendingOsChargeUseCase: ListPendingOsChargeUseCase
+        private readonly listPendingOsChargeUseCase: ListPendingOsChargeUseCase,
+        private readonly registerPaymentUseCase: RegisterPaymentUseCase
     ) { }
 
     @Post('ordem-servico/:id/faturar')
@@ -90,12 +97,12 @@ export class FinanceiroController {
     @Get('cobrancas/pendentes')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({
-        summary: 'Listar cobranças pendentes',
+        summary: 'Listar cobranças',
         description:
-            'Retorna os lançamentos financeiros que possuem status PENDENTE, ordenados pela data de cadastro.',
+            'Retorna os lançamentos financeiros, ordenados pela data de cadastro.',
     })
     @ApiOkResponse({
-        description: 'Cobranças pendentes listadas com sucesso.',
+        description: 'Cobranças listadas com sucesso.',
         schema: {
             example: [
                 {
@@ -117,7 +124,89 @@ export class FinanceiroController {
     @ApiUnauthorizedResponse({
         description: 'Token de autenticação ausente ou inválido.',
     })
-    async listPending() {
+    async listAll() {
         return this.listPendingOsChargeUseCase.execute()
+    }
+
+    @Patch(':id/pagar')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({
+        summary: 'Registrar pagamento de lançamento financeiro',
+        description:
+            'Registra o pagamento de um lançamento financeiro, informando a forma de pagamento e atualizando seu status para PAGO.',
+    })
+    @ApiParam({
+        name: 'id',
+        type: Number,
+        description: 'Identificador único do lançamento financeiro.',
+        example: 1,
+    })
+    @ApiBody({
+        description: 'Dados necessários para registrar o pagamento.',
+        schema: {
+            type: 'object',
+            required: ['forma_pagamento'],
+            properties: {
+                forma_pagamento: {
+                    type: 'string',
+                    enum: [
+                        'PIX',
+                        'CARTAO_CREDITO',
+                        'CARTAO_DEBITO',
+                        'DINHEIRO',
+                        'BOLETO',
+                        'TRANSFERENCIA',
+                    ],
+                    example: 'PIX',
+                    description: 'Forma de pagamento utilizada.',
+                },
+            },
+        },
+        examples: {
+            pix: {
+                summary: 'Pagamento via PIX',
+                value: {
+                    forma_pagamento: 'PIX',
+                },
+            },
+            cartao: {
+                summary: 'Pagamento via cartão de crédito',
+                value: {
+                    forma_pagamento: 'CARTAO_CREDITO',
+                },
+            },
+        },
+    })
+    @ApiOkResponse({
+        description: 'Pagamento registrado com sucesso.',
+        schema: {
+            example: {
+                id_financeiro: 1,
+                id_ordem_servico: 10,
+                descricao: 'Faturamento referente à ordem de serviço #10',
+                tipo_lancamento: 'RECEITA',
+                status_pagamento: 'PAGO',
+                valor: '350.00',
+                forma_pagamento: 'PIX',
+                referencia_externa: null,
+                data_vencimento: '2026-10-30T00:00:00.000Z',
+                data_pagamento: '2026-10-27T20:00:00.000Z',
+                data_cadastro: '2026-10-27T18:00:00.000Z',
+            },
+        },
+    })
+    @ApiBadRequestResponse({
+        description:
+            'Dados inválidos ou lançamento que não pode ser pago, como um lançamento já pago ou cancelado.',
+    })
+    @ApiNotFoundResponse({
+        description: 'Lançamento financeiro não encontrado.',
+    })
+    async registrarPagamento(
+        @Param('id', ParseIntPipe) idFinanceiro: number,
+        @Body(new ZodValidationPipe(PaymentRegisterSchema))
+        body: PaymentRegisterDTO,
+    ) {
+        return this.registerPaymentUseCase.execute(idFinanceiro, body)
     }
 }
