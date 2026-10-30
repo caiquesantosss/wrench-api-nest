@@ -9,11 +9,17 @@ import { OrdemServicoModule } from './ordem-servico/ordem-servico.module'
 import { CatalogoItemModule } from './catalogo-item/catalogo-item.module'
 import { AtivoModule } from './ativo/ativo.module'
 import { FinanceiroModule } from './financeiro/financeiro.module';
+import { AuditoriaModule } from './auditoria/auditoria.module';
+import { EventEmitterModule } from '@nestjs/event-emitter'
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule()
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot({
+      wildcard: true, 
+      global: true
+    }),
     ObserveModule.forRoot({
       appKey: 'YOUR_APP_KEY',
       appSecret: 'YOUR_APP_SECRET',
@@ -26,6 +32,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule()
     CatalogoItemModule,
     AtivoModule,
     FinanceiroModule,
+    AuditoriaModule,
   ],
   controllers: [AppController],
   providers: [AppService],

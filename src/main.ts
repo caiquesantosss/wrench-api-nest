@@ -14,6 +14,7 @@ import {
 
 import { AppModule } from './app.module'
 import { env } from './env/env'
+import { ContextInterceptor } from './shared/presentation/interceptor/context.interceptor'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -23,6 +24,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api')
 
+  app.enableCors()
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -30,6 +32,10 @@ async function bootstrap() {
       transform: true,
     }),
   )
+
+
+
+  app.useGlobalInterceptors(new ContextInterceptor())
 
   const config = new DocumentBuilder()
     .setTitle('WrenchOS API')
