@@ -122,6 +122,89 @@ export class PrismaOrdemServicoRepository implements OrdemServicoRepository {
     return this.mapToDomain(serviceOrderData)
   }
 
+async listAll() {
+    const serviceOrdersData = await this.prisma.ordemServico.findMany({
+        relationLoadStrategy: 'join',
+
+        select: {
+            id_ordem_servico: true,
+            id_cliente: true,
+            id_ativo: true,
+            id_usuario: true,
+            status: true,
+            descricao_problema: true,
+            diagnostico: true,
+            solucao_aplicada: true,
+            valor_mao_obra: true,
+            valor_pecas: true,
+            valor_total: true,
+            data_abertura: true,
+            data_previsao: true,
+            data_conclusao: true,
+            data_atualizacao: true,
+
+            // JOIN com Cliente
+            cliente: {
+                select: {
+                    id_cliente: true,
+                    nome: true,
+                    documento: true,
+                    telefone: true,
+                    email: true,
+                },
+            },
+
+            ativo: {
+                select: {
+                    id_ativo: true,
+                    descricao: true,
+                    tipo: true,
+                    marca: true,
+                    modelo: true,
+                    identificacao: true,
+                },
+            },
+
+            usuario: {
+                select: {
+                    id_usuario: true,
+                    nome: true,
+                    email: true,
+                    perfil: true,
+                },
+            },
+
+            itens_os: {
+                select: {
+                    id_item_os: true,
+                    id_catalogo_item: true,
+                    quantidade: true,
+                    valor_unitario: true,
+                    valor_total: true,
+                    status_aprovacao: true,
+                    baixa_estoque: true,
+                    data_cadastro: true,
+
+                    catalogo_item: {
+                        select: {
+                            id_catalogo_item: true,
+                            descricao: true,
+                            tipo_item: true,
+                            unidade: true,
+                            valor_unitario: true,
+                        },
+                    },
+                },
+            },
+        },
+
+        orderBy: {
+            data_abertura: 'desc',
+        },
+    })
+
+    return serviceOrdersData
+}
 
   private mapToDomain(data: any): OrdemServico {
     const serviceOrder = OrdemServico.recover(

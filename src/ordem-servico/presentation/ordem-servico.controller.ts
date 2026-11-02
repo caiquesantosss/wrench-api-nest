@@ -8,7 +8,8 @@ import {
     Patch,
     Post,
     UseGuards,
-    Delete
+    Delete,
+    Get
 } from '@nestjs/common'
 
 import {
@@ -49,6 +50,7 @@ import { RemoveItemOsUseCase } from '../application/use-cases/remove-item-os-use
 import { CancelItemOsUseCase } from '../application/use-cases/cancel-item-os-use-case'
 import { CompleteServiceOrderUseCase } from '../application/use-cases/complete-service-order-use-case'
 import { UpdateEstimateCompletionUseCase } from '../application/use-cases/update-estimate-completion-date-use-case'
+import { GetAllOSUseCase } from '../application/use-cases/get-all-os-use-case'
 
 @ApiTags('Ordem de Serviço')
 @ApiBearerAuth('JWT-auth')
@@ -65,7 +67,8 @@ export class OrdemServicoController {
         private readonly removeItemOsUseCase: RemoveItemOsUseCase,
         private readonly cancelItemOsUseCase: CancelItemOsUseCase,
         private readonly completeServiceOrderUseCase: CompleteServiceOrderUseCase,
-        private readonly updateEstimateCompletionDateUseCase: UpdateEstimateCompletionUseCase
+        private readonly updateEstimateCompletionDateUseCase: UpdateEstimateCompletionUseCase,
+        private readonly getAllOSUseCase: GetAllOSUseCase
     ) { }
 
     @Post()
@@ -428,5 +431,22 @@ export class OrdemServicoController {
             )
 
         return OrdemServicoMapper.toHttp(serviceOrder)
+    }
+
+    @Get('/listar-os')
+    @ApiOperation({
+        summary: 'Listar todas as ordens de serviço',
+        description: 'Retorna a lista de todas as ordens de serviço cadastradas no sistema.',
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Lista de ordens de serviço retornada com sucesso.',
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Usuário não autenticado.',
+    })
+    async listarOs() {
+        return this.getAllOSUseCase.execute()
     }
 }
