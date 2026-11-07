@@ -27,7 +27,7 @@ import { PaymentRegisterDTO, PaymentRegisterSchema } from '../application/dtos/p
 import { ZodValidationPipe } from '../../shared/pipes/zod-validation-pipe'
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth-guard'
 
-import { ListPendingOsChargeUseCase } from '../application/use-cases/list-all-os-charge-use-case'
+import { ListAllOSChargeUseCase } from '../application/use-cases/list-all-os-charge-use-case'
 import { GenerateOSChargeUseCase } from '../application/use-cases/generate-os-charge-use-case'
 import { RegisterPaymentUseCase } from '../application/use-cases/register-payment-use-case'
 
@@ -38,7 +38,7 @@ import { RegisterPaymentUseCase } from '../application/use-cases/register-paymen
 export class FinanceiroController {
     constructor(
         private readonly generateOSChargeUseCase: GenerateOSChargeUseCase,
-        private readonly listPendingOsChargeUseCase: ListPendingOsChargeUseCase,
+        private readonly listAllOSChargeUseCase: ListAllOSChargeUseCase,
         private readonly registerPaymentUseCase: RegisterPaymentUseCase
     ) { }
 
@@ -94,7 +94,7 @@ export class FinanceiroController {
         return this.generateOSChargeUseCase.execute(idOrdemServico)
     }
 
-    @Get('cobrancas/pendentes')
+    @Get()
     @HttpCode(HttpStatus.OK)
     @ApiOperation({
         summary: 'Listar cobranças',
@@ -125,7 +125,7 @@ export class FinanceiroController {
         description: 'Token de autenticação ausente ou inválido.',
     })
     async listAll() {
-        return this.listPendingOsChargeUseCase.execute()
+        return this.listAllOSChargeUseCase.execute()
     }
 
     @Patch(':id/pagar')

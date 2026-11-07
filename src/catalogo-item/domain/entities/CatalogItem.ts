@@ -112,6 +112,10 @@ export class CatalogItem {
             throw new Error('A quantidade deve ser maior que 0')
         }
 
+        if (this._estoque_atual + quantity < 0) {
+            throw new Error('Estoque insuficiente para realizar a baixa.')
+        }
+
         this._estoque_atual += quantity
     }
 
