@@ -7,6 +7,7 @@ import { PrismaFinanceiroRepository } from './infrastructure/database/PrismaFina
 import { GenerateOSChargeUseCase } from './application/use-cases/generate-os-charge-use-case'
 import { ListAllOSChargeUseCase } from './application/use-cases/list-all-os-charge-use-case'
 import { RegisterPaymentUseCase } from './application/use-cases/register-payment-use-case'
+import { ListAllFinanceiroWithOSUseCase } from './application/use-cases/list-all-finance-with-os-use-case'
 
 @Module({
     imports: [
@@ -23,7 +24,8 @@ import { RegisterPaymentUseCase } from './application/use-cases/register-payment
         },
         GenerateOSChargeUseCase,
         ListAllOSChargeUseCase,
-        RegisterPaymentUseCase
+        RegisterPaymentUseCase, 
+        ListAllFinanceiroWithOSUseCase
     ],
     exports: [
         'FinanceiroRepository',

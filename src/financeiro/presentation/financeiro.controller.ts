@@ -30,6 +30,7 @@ import { JwtAuthGuard } from '../../shared/guards/jwt-auth-guard'
 import { ListAllOSChargeUseCase } from '../application/use-cases/list-all-os-charge-use-case'
 import { GenerateOSChargeUseCase } from '../application/use-cases/generate-os-charge-use-case'
 import { RegisterPaymentUseCase } from '../application/use-cases/register-payment-use-case'
+import { ListAllFinanceiroWithOSUseCase } from '../application/use-cases/list-all-finance-with-os-use-case'
 
 @ApiTags('Financeiro')
 @ApiBearerAuth('JWT-auth')
@@ -39,7 +40,8 @@ export class FinanceiroController {
     constructor(
         private readonly generateOSChargeUseCase: GenerateOSChargeUseCase,
         private readonly listAllOSChargeUseCase: ListAllOSChargeUseCase,
-        private readonly registerPaymentUseCase: RegisterPaymentUseCase
+        private readonly registerPaymentUseCase: RegisterPaymentUseCase,
+        private readonly listAllFinanceiroWithOSUseCase: ListAllFinanceiroWithOSUseCase
     ) { }
 
     @Post('ordem-servico/:id/faturar')
@@ -208,5 +210,18 @@ export class FinanceiroController {
         body: PaymentRegisterDTO,
     ) {
         return this.registerPaymentUseCase.execute(idFinanceiro, body)
+    }
+
+    @Get('com-ordens-servico')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({
+        summary: 'Listar lançamentos financeiros com ordens de serviço',
+        description: 'Retorna todos os lançamentos financeiros acompanhados dos dados de suas respectivas ordens de serviço.',
+    })
+    @ApiOkResponse({
+        description: 'Lista de lançamentos financeiros retornada com sucesso.',
+    })
+    async listarTodosComOrdensServico() {
+        return this.listAllFinanceiroWithOSUseCase.execute()
     }
 }

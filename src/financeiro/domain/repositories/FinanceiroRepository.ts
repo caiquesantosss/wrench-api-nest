@@ -1,3 +1,4 @@
+import { FinanceiroResponseDTO } from "../../application/dtos/list-all-os.dto";
 import { LancamentoFinanceiro } from "../entities/LancamentoFinanceiro";
 
 export interface FinanceiroRepository {
@@ -6,4 +7,5 @@ export interface FinanceiroRepository {
     listByClient(id_cliente: number): Promise<LancamentoFinanceiro[]>
     listAll(): Promise<LancamentoFinanceiro[]>
     findByOS(id_os: number): Promise<LancamentoFinanceiro | null>
+    listAllWithOS(): Promise<FinanceiroResponseDTO[]>
 }

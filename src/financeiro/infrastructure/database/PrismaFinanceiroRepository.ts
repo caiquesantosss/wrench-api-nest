@@ -8,13 +8,14 @@ import {
     MetodoPagamento,
 } from '../../domain/entities/LancamentoFinanceiro'
 import { Prisma } from '../../../generated/prisma/client'
+import { FinanceiroResponseDTO } from '../../application/dtos/list-all-os.dto'
 
 @Injectable()
 export class PrismaFinanceiroRepository implements FinanceiroRepository {
     constructor(
         @Inject(PrismaService)
         private readonly prisma: Prisma.TransactionClient
-    ) {}
+    ) { }
 
     async save(
         lancamento: LancamentoFinanceiro
@@ -33,14 +34,14 @@ export class PrismaFinanceiroRepository implements FinanceiroRepository {
 
         const lancamentoSalvo = lancamento.id_financeiro
             ? await this.prisma.financeiro.update({
-                  where: {
-                      id_financeiro: lancamento.id_financeiro,
-                  },
-                  data,
-              })
+                where: {
+                    id_financeiro: lancamento.id_financeiro,
+                },
+                data,
+            })
             : await this.prisma.financeiro.create({
-                  data,
-              })
+                data,
+            })
 
         return this.mapToDomain(lancamentoSalvo)
     }
@@ -90,6 +91,58 @@ export class PrismaFinanceiroRepository implements FinanceiroRepository {
         return lancamentosDb.map(
             lancamento => this.mapToDomain(lancamento)
         )
+    }
+
+    async listAllWithOS(): Promise<FinanceiroResponseDTO[]> {
+        const lancamentosDb = await this.prisma.financeiro.findMany({
+            include: {
+                ordem_servico: {
+                    select: {
+                        id_ordem_servico: true,
+                        status: true,
+                        descricao_problema: true,
+                        diagnostico: true,
+                        solucao_aplicada: true,
+                        valor_mao_obra: true,
+                        valor_pecas: true,
+                        valor_total: true,
+                        data_abertura: true,
+                        data_previsao: true,
+                        data_conclusao: true,
+                    },
+                },
+            },
+            orderBy: {
+                data_cadastro: 'desc',
+            },
+        })
+
+        return lancamentosDb.map((lancamento) => ({
+            id_financeiro: lancamento.id_financeiro,
+            id_ordem_servico: lancamento.id_ordem_servico,
+            descricao: lancamento.descricao,
+            tipo_lancamento: lancamento.tipo_lancamento as TipoLancamento,
+            status_pagamento: lancamento.status_pagamento as StatusPagamento,
+            valor: Number(lancamento.valor),
+            forma_pagamento: lancamento.forma_pagamento as MetodoPagamento | null,
+            referencia_externa: lancamento.referencia_externa,
+            data_vencimento: lancamento.data_vencimento,
+            data_pagamento: lancamento.data_pagamento,
+            data_cadastro: lancamento.data_cadastro,
+            ordem_servico: {
+                id_ordem_servico: lancamento.ordem_servico.id_ordem_servico,
+                status: lancamento.ordem_servico.status,
+                descricao_problema: lancamento.ordem_servico.descricao_problema,
+                diagnostico: lancamento.ordem_servico.diagnostico,
+                solucao_aplicada: lancamento.ordem_servico.solucao_aplicada,
+                valor_mao_obra: Number(lancamento.ordem_servico.valor_mao_obra),
+                valor_pecas: Number(lancamento.ordem_servico.valor_pecas),
+                valor_total: Number(lancamento.ordem_servico.valor_total),
+                data_abertura: lancamento.ordem_servico.data_abertura,
+                data_previsao: lancamento.ordem_servico.data_previsao,
+                data_conclusao: lancamento.ordem_servico.data_conclusao,
+            },
+        }))
     }
 
     async findByOS(
