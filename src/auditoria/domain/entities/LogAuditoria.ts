@@ -47,6 +47,30 @@ export class LogAuditoria {
         )
     }
 
+    public static recover(
+        id_auditoria: number,
+        id_usuario: number,
+        tabela_afetada: string,
+        operacao: TipoOperacaoAuditoria,
+        registro_id: number,
+        descricao: string | null,
+        dados_anteriores: Record<string, any> | null,
+        dados_novos: Record<string, any> | null,
+        data_evento: Date
+    ): LogAuditoria {
+        return new LogAuditoria(
+            id_usuario,
+            tabela_afetada,
+            operacao,
+            registro_id,
+            descricao,
+            dados_anteriores,
+            dados_novos,
+            data_evento,
+            id_auditoria
+        )
+    }
+
     get id_usuario() { return this._id_usuario }
     get tabela_afetada() { return this._tabela_afetada }
     get operacao() { return this._operacao }
@@ -54,4 +78,6 @@ export class LogAuditoria {
     get descricao() { return this._descricao }
     get dados_anteriores() { return this._dados_anteriores }
     get dados_novos() { return this._dados_novos }
+    get id_auditoria() { return this._id_auditoria }
+    get data_evento() { return this._data_evento }
 }
