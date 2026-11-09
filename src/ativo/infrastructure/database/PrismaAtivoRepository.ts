@@ -58,6 +58,14 @@ export class PrismaAtivoRepository implements AtivoRepository {
         return ativoDB.map(ativoDB => this.mapToDomain(ativoDB))
     }
 
+    async listAll(): Promise<Ativo[]> {
+        const ativosDB = await this.prisma.ativo.findMany({
+            orderBy: { data_cadastro: 'desc' } 
+        })
+
+        return ativosDB.map(ativoDB => this.mapToDomain(ativoDB))
+    }
+
     async findByIdentification(identificacao: string): Promise<Ativo | null> {
         const ativoDb = await this.prisma.ativo.findFirst({
             where: { identificacao }

@@ -37,6 +37,7 @@ import { FindAtivoUseCase } from '../application/use-cases/find-ativo-use-case'
 import { ListAtivoUseCase } from '../application/use-cases/list-ativo-use-case'
 import { ToggleAtivoStatusUseCase } from '../application/use-cases/toggle-ativo-status-use-case'
 import { UpdateDetailsAtivoUseCase } from '../application/use-cases/update-details-ativo-use-case'
+import { ListAllAtivoUseCase } from '../application/use-cases/list-all-ativo-use-case'
 
 @ApiTags('Ativos')
 @ApiBearerAuth('JWT-auth')
@@ -48,7 +49,8 @@ export class AtivoController {
         private readonly findAtivoUseCase: FindAtivoUseCase,
         private readonly listAtivoUseCase: ListAtivoUseCase,
         private readonly toggleAtivoStatusUseCase: ToggleAtivoStatusUseCase, 
-        private readonly updateDetailsAtivoUseCase: UpdateDetailsAtivoUseCase
+        private readonly updateDetailsAtivoUseCase: UpdateDetailsAtivoUseCase,  
+        private readonly listAllAtivoUseCase: ListAllAtivoUseCase
     ) { }
 
     @Post()
@@ -189,6 +191,19 @@ export class AtivoController {
             await this.updateDetailsAtivoUseCase.execute(id, body)
 
         return AtivoMapper.toHttp(ativoAtualizado)
+    }
+
+    @Get()
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({
+        summary: 'Listar todos os ativos',
+        description: 'Retorna uma lista contendo todos os veículos ou máquinas registados no sistema.'
+    })
+    @ApiOkResponse({ description: 'Lista de ativos retornada com sucesso.' })
+    async listarTodos() {
+        const ativos = await this.listAllAtivoUseCase.execute()
+
+        return ativos.map(ativo => AtivoMapper.toHttp(ativo))
     }
 
 }
