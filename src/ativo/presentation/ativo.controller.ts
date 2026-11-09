@@ -20,7 +20,7 @@ import {
     ApiBody,
     ApiOkResponse,
     ApiNotFoundResponse,
-    ApiParam, 
+    ApiParam,
     ApiBadRequestResponse
 } from '@nestjs/swagger'
 
@@ -38,6 +38,8 @@ import { ListAtivoUseCase } from '../application/use-cases/list-ativo-use-case'
 import { ToggleAtivoStatusUseCase } from '../application/use-cases/toggle-ativo-status-use-case'
 import { UpdateDetailsAtivoUseCase } from '../application/use-cases/update-details-ativo-use-case'
 import { ListAllAtivoUseCase } from '../application/use-cases/list-all-ativo-use-case'
+import { ListAllAtivosWithClientUseCase } from '../application/use-cases/list-all-ativo-with-client-use-case'
+import { AtivoWithClientMapper } from './mappers/ativo-with-client.mapper'
 
 @ApiTags('Ativos')
 @ApiBearerAuth('JWT-auth')
@@ -48,9 +50,10 @@ export class AtivoController {
         private readonly createAtivoUseCase: CreateAtivoUseCase,
         private readonly findAtivoUseCase: FindAtivoUseCase,
         private readonly listAtivoUseCase: ListAtivoUseCase,
-        private readonly toggleAtivoStatusUseCase: ToggleAtivoStatusUseCase, 
-        private readonly updateDetailsAtivoUseCase: UpdateDetailsAtivoUseCase,  
-        private readonly listAllAtivoUseCase: ListAllAtivoUseCase
+        private readonly toggleAtivoStatusUseCase: ToggleAtivoStatusUseCase,
+        private readonly updateDetailsAtivoUseCase: UpdateDetailsAtivoUseCase,
+        private readonly listAllAtivoUseCase: ListAllAtivoUseCase,
+        private readonly listAllAtivosWithClientUseCase: ListAllAtivosWithClientUseCase
     ) { }
 
     @Post()
@@ -156,6 +159,7 @@ export class AtivoController {
             },
         },
     })
+
     @ApiOkResponse({
         description: 'Ativo atualizado com sucesso.',
         schema: {
@@ -204,6 +208,19 @@ export class AtivoController {
         const ativos = await this.listAllAtivoUseCase.execute()
 
         return ativos.map(ativo => AtivoMapper.toHttp(ativo))
+    }
+
+    @Get('com-clientes')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({
+        summary: 'Listar ativos com clientes',
+        description: 'Retorna os ativos acompanhados dos dados dos respectivos clientes.'
+    })
+    @ApiOkResponse({ description: 'Lista de ativos com clientes retornada com sucesso.' })
+    async listarTodosComClientes() {
+        const ativos = await this.listAllAtivosWithClientUseCase.execute()
+
+        return AtivoWithClientMapper.toHttpList(ativos)
     }
 
 }

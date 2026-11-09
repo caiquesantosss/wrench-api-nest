@@ -3,6 +3,7 @@ import { AtivoRepository } from "../../domain/repositories/AtivoRepository"
 import { PrismaService } from "../../../prisma/prisma.service"
 import { Ativo } from "../../domain/entities/ativo"
 import { Prisma } from "../../../generated/prisma/client"
+import { AtivoWithClientDTO } from "../../application/dtos/ativo-with-client.dto"
 
 @Injectable()
 export class PrismaAtivoRepository implements AtivoRepository {
@@ -60,12 +61,33 @@ export class PrismaAtivoRepository implements AtivoRepository {
 
     async listAll(): Promise<Ativo[]> {
         const ativosDB = await this.prisma.ativo.findMany({
-            orderBy: { data_cadastro: 'desc' } 
+            orderBy: {
+                data_cadastro: 'desc'
+            }
         })
 
         return ativosDB.map(ativoDB => this.mapToDomain(ativoDB))
     }
 
+    async listAllWithClient(): Promise<AtivoWithClientDTO[]> {
+        const ativosDB = await this.prisma.ativo.findMany({
+            include: {
+                cliente: {
+                    select: {
+                        id_cliente: true,
+                        nome: true,
+                        documento: true
+                    }
+                }
+            },
+            orderBy: {
+                data_cadastro: 'desc'
+            }
+        })
+
+        return ativosDB
+    }
+    
     async findByIdentification(identificacao: string): Promise<Ativo | null> {
         const ativoDb = await this.prisma.ativo.findFirst({
             where: { identificacao }
