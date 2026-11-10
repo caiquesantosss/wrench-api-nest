@@ -9,7 +9,8 @@ import {
     Post,
     UseGuards,
     Delete,
-    Get
+    Get,
+    Put
 } from '@nestjs/common'
 
 import {
@@ -52,6 +53,8 @@ import { CompleteServiceOrderUseCase } from '../application/use-cases/complete-s
 import { UpdateEstimateCompletionUseCase } from '../application/use-cases/update-estimate-completion-date-use-case'
 import { GetAllOSUseCase } from '../application/use-cases/get-all-os-use-case'
 import { GetOrderDetailsUseCase } from '../application/use-cases/find-order-by-id-use-case'
+import { UpdateOrderServicoDTO, updateOrderServicoSchema } from '../application/dtos/update-order-service.dto'
+import { UpdateOrdemServicoUseCase } from '../application/use-cases/update-order-service-use-case'
 
 @ApiTags('Ordem de Serviço')
 @ApiBearerAuth('JWT-auth')
@@ -70,7 +73,8 @@ export class OrdemServicoController {
         private readonly completeServiceOrderUseCase: CompleteServiceOrderUseCase,
         private readonly updateEstimateCompletionDateUseCase: UpdateEstimateCompletionUseCase,
         private readonly getAllOSUseCase: GetAllOSUseCase,
-        private readonly getOrderDetailsUseCase: GetOrderDetailsUseCase
+        private readonly getOrderDetailsUseCase: GetOrderDetailsUseCase, 
+        private readonly updateOrdemServicoUseCase: UpdateOrdemServicoUseCase
     ) { }
 
     @Post()
@@ -486,5 +490,14 @@ export class OrdemServicoController {
         @Param('id', ParseIntPipe) id: number,
     ) {
         return this.getOrderDetailsUseCase.execute(id)
+    }
+
+    @Put(':id')
+    async update(
+        @Param('id', ParseIntPipe) id: number,
+        @Body(new ZodValidationPipe(updateOrderServicoSchema))
+        data: UpdateOrderServicoDTO
+    ) {
+        return this.updateOrdemServicoUseCase.execute(id, data)
     }
 }

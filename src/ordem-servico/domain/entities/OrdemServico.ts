@@ -160,6 +160,54 @@ export class OrdemServico {
         this.recalculateTotals()
     }
 
+    public updateBasicInformation(
+        idCliente: number,
+        idAtivo: number,
+        descricaoProblema: string,
+        dataPrevisao: Date | null
+    ): void {
+        this.checkIfFrozen()
+
+        if (!Number.isInteger(idCliente) || idCliente <= 0) {
+            throw new Error('Cliente inválido.')
+        }
+
+        if (!Number.isInteger(idAtivo) || idAtivo <= 0) {
+            throw new Error('Ativo inválido.')
+        }
+
+        if (
+            !descricaoProblema ||
+            descricaoProblema.trim().length < 5
+        ) {
+            throw new Error(
+                'A descrição do problema deve possuir pelo menos 5 caracteres.'
+            )
+        }
+
+        if (dataPrevisao) {
+            if (Number.isNaN(dataPrevisao.getTime())) {
+                throw new Error('Data de previsão inválida.')
+            }
+
+            const hoje = new Date()
+            hoje.setHours(0, 0, 0, 0)
+
+            if (dataPrevisao < hoje) {
+                throw new Error(
+                    'A data de previsão não pode estar no passado.'
+                )
+            }
+        }
+
+        this._id_cliente = idCliente
+        this._id_ativo = idAtivo
+        this._descricao_problema = descricaoProblema.trim()
+        this._data_previsao = dataPrevisao ?? undefined
+
+        this.updateDate()
+    }
+
     public removeItem(idCatalogoItem: number): void {
         this.checkIfFrozen()
 

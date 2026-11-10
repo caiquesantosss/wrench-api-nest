@@ -19,6 +19,7 @@ import { PrismaAtivoRepository } from '../ativo/infrastructure/database/PrismaAt
 import { UpdateEstimateCompletionUseCase } from './application/use-cases/update-estimate-completion-date-use-case'
 import { GetAllOSUseCase } from './application/use-cases/get-all-os-use-case'
 import { GetOrderDetailsUseCase } from './application/use-cases/find-order-by-id-use-case'
+import { UpdateOrdemServicoUseCase } from './application/use-cases/update-order-service-use-case'
 
 @Module({
   imports: [
@@ -52,7 +53,8 @@ import { GetOrderDetailsUseCase } from './application/use-cases/find-order-by-id
     CompleteServiceOrderUseCase,
     UpdateEstimateCompletionUseCase, 
     GetAllOSUseCase, 
-    GetOrderDetailsUseCase
+    GetOrderDetailsUseCase, 
+    UpdateOrdemServicoUseCase
   ],
 })
 export class OrdemServicoModule {}
