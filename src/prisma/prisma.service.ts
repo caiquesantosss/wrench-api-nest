@@ -1,4 +1,4 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common"
+import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common"
 import { PrismaPg } from "@prisma/adapter-pg"
 import { PrismaClient } from "../generated/prisma/client"
 import { env } from "../env/env"
@@ -10,7 +10,10 @@ import { TipoOperacaoAuditoria } from "../auditoria/domain/entities/LogAuditoria
 export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy {
-  constructor(private readonly eventEmitter: EventEmitter2) {
+  constructor(
+    @Inject(EventEmitter2)
+    private readonly eventEmitter: EventEmitter2
+  ) {
     const connectionString = env.DATABASE_URL
 
     if (!connectionString) {
@@ -20,6 +23,17 @@ export class PrismaService
     const adapter = new PrismaPg({ connectionString })
 
     super({ adapter })
+
+    if (!this.eventEmitter) {
+      throw new Error(
+        "EventEmitter2 não foi injetado no PrismaService."
+      )
+    }
+
+    console.log(
+      "EventEmitter2 injetado:",
+      this.eventEmitter.constructor.name
+    )
 
     const auditoriaEmitter = this.eventEmitter
 

@@ -22,7 +22,6 @@ export class CreateUserUseCase {
             throw new BadRequestException("User with this email already exists.")
         }
 
-        const salt = await bcrypt.genSalt(10)
         const hashedPassword = await this.hasher.hash(userData.senha)
 
         const newUser = User.create(

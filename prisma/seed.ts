@@ -1,6 +1,7 @@
+
 import { NestFactory } from "@nestjs/core"
-import { AppModule } from "../app.module"
-import { PrismaService } from "./prisma.service"
+import { AppModule } from "../src/app.module"
+import { PrismaService } from "../src/prisma/prisma.service"
 import bcrypt from "bcryptjs"
 
 async function main() {
@@ -9,16 +10,23 @@ async function main() {
   try {
     const prisma = app.get(PrismaService)
 
+    const email = "admin@wrenchos.com"
+
+    const adminExistente = await prisma.usuario.findUnique({
+      where: { email },
+    })
+
+    if (adminExistente) {
+      console.log("O administrador já existe. Nenhuma alteração foi realizada.")
+      return
+    }
+
     const senhaHash = await bcrypt.hash("Mudar@123", 10)
 
-    const admin = await prisma.usuario.upsert({
-      where: {
-        email: "admin@wrenchos.com",
-      },
-      update: {},
-      create: {
+    const admin = await prisma.usuario.create({
+      data: {
         nome: "Administrador Master",
-        email: "admin@wrenchos.com",
+        email,
         senha_hash: senhaHash,
         perfil: "GERENTE",
       },
@@ -32,6 +40,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(error)
-  process.exit(1)
+  console.error("Erro ao executar seed:", error)
+  process.exitCode = 1
 })
