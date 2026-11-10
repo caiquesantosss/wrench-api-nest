@@ -18,11 +18,11 @@ export class AddItemOsUseCase {
 
         @Inject('CatalogItemRepository')
         private readonly catalogItemRepository: CatalogItemRepository,
-    ) { }
+    ) {}
 
     async execute(
         serviceOrderId: number,
-        data: AddItemOsDTO,
+        items: AddItemOsDTO[],
     ): Promise<OrdemServico> {
         const serviceOrder =
             await this.ordemServicoRepository.findById(serviceOrderId)
@@ -33,40 +33,66 @@ export class AddItemOsUseCase {
             )
         }
 
-        const catalogItem = await this.catalogItemRepository.findById(
-            data.id_catalogo_item,
+        if (!items.length) {
+            throw new BadRequestException(
+                'É necessário informar pelo menos um item.',
+            )
+        }
+
+        const itemIds = items.map(item => item.id_catalogo_item)
+
+        if (new Set(itemIds).size !== itemIds.length) {
+            throw new BadRequestException(
+                'Não é permitido enviar o mesmo item do catálogo mais de uma vez.',
+            )
+        }
+
+        const validatedItems = await Promise.all(
+            items.map(async data => {
+                const catalogItem =
+                    await this.catalogItemRepository.findById(
+                        data.id_catalogo_item,
+                    )
+
+                if (!catalogItem) {
+                    throw new NotFoundException(
+                        `O item de catálogo ${data.id_catalogo_item} não foi encontrado.`,
+                    )
+                }
+
+                if (!catalogItem.active) {
+                    throw new BadRequestException(
+                        `O item ${data.id_catalogo_item} está inativo.`,
+                    )
+                }
+
+                if (catalogItem.id_catalogo_item === undefined) {
+                    throw new BadRequestException(
+                        'O item do catálogo não possui um identificador válido.',
+                    )
+                }
+
+                if (catalogItem.valor_unitario === undefined) {
+                    throw new BadRequestException(
+                        `O item ${data.id_catalogo_item} não possui um preço definido.`,
+                    )
+                }
+
+                return {
+                    data,
+                    catalogItem,
+                }
+            }),
         )
 
-        if (!catalogItem) {
-            throw new NotFoundException(
-                'Item do catálogo não pode ser encontrado.',
+        for (const { data, catalogItem } of validatedItems) {
+            serviceOrder.addItem(
+                catalogItem.id_catalogo_item!,
+                catalogItem.tipo_item,
+                data.quantidade,
+                Number(catalogItem.valor_unitario),
             )
         }
-
-        if (!catalogItem.active) {
-            throw new BadRequestException(
-                'Não é possível adicionar um item inativo.',
-            )
-        }
-
-        if (catalogItem.id_catalogo_item === undefined) {
-            throw new BadRequestException(
-                'O item do catálogo não possui um identificador válido.',
-            )
-        }
-
-        if (catalogItem.valor_unitario === undefined) {
-            throw new BadRequestException(
-                'O item do catálogo não possui um preço definido.',
-            )
-        }
-
-        serviceOrder.addItem(
-            catalogItem.id_catalogo_item,
-            catalogItem.tipo_item,
-            data.quantidade,
-            Number(catalogItem.valor_unitario),
-        )
 
         return await this.ordemServicoRepository.save(serviceOrder)
     }

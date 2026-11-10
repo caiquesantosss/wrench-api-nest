@@ -18,6 +18,7 @@ import { PrismaUnitOfWork } from '../shared/infrastructure/prisma-unit-of-work'
 import { PrismaAtivoRepository } from '../ativo/infrastructure/database/PrismaAtivoRepository'
 import { UpdateEstimateCompletionUseCase } from './application/use-cases/update-estimate-completion-date-use-case'
 import { GetAllOSUseCase } from './application/use-cases/get-all-os-use-case'
+import { GetOrderDetailsUseCase } from './application/use-cases/find-order-by-id-use-case'
 
 @Module({
   imports: [
@@ -50,7 +51,8 @@ import { GetAllOSUseCase } from './application/use-cases/get-all-os-use-case'
     CancelItemOsUseCase, 
     CompleteServiceOrderUseCase,
     UpdateEstimateCompletionUseCase, 
-    GetAllOSUseCase
+    GetAllOSUseCase, 
+    GetOrderDetailsUseCase
   ],
 })
 export class OrdemServicoModule {}

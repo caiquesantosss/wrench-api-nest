@@ -4,6 +4,7 @@ import { OrdemServico, StatusOS } from '../../domain/entities/OrdemServico'
 import { ItemOS } from '../../domain/entities/ItemOS'
 import { OrdemServicoRepository } from '../../domain/repositories/OrdemServicoRepository'
 import { Prisma } from '../../../generated/prisma/client'
+import { OrdemServicoDetailsDTO } from '../../application/dtos/order-service-details.dto'
 
 @Injectable()
 export class PrismaOrdemServicoRepository implements OrdemServicoRepository {
@@ -122,89 +123,193 @@ export class PrismaOrdemServicoRepository implements OrdemServicoRepository {
     return this.mapToDomain(serviceOrderData)
   }
 
-async listAll() {
-    const serviceOrdersData = await this.prisma.ordemServico.findMany({
-        relationLoadStrategy: 'join',
+  async findDetailsById(
+    id: number,
+  ): Promise<OrdemServicoDetailsDTO | null> {
+    const serviceOrderData = await this.prisma.ordemServico.findUnique({
+      where: {
+        id_ordem_servico: id,
+      },
 
-        select: {
-            id_ordem_servico: true,
+      relationLoadStrategy: 'join',
+
+      select: {
+        id_ordem_servico: true,
+        id_cliente: true,
+        id_ativo: true,
+        id_usuario: true,
+        status: true,
+        descricao_problema: true,
+        diagnostico: true,
+        solucao_aplicada: true,
+        valor_mao_obra: true,
+        valor_pecas: true,
+        valor_total: true,
+        data_abertura: true,
+        data_previsao: true,
+        data_conclusao: true,
+        data_atualizacao: true,
+
+        cliente: {
+          select: {
             id_cliente: true,
+            nome: true,
+            documento: true,
+            telefone: true,
+            email: true,
+          },
+        },
+
+        ativo: {
+          select: {
             id_ativo: true,
+            descricao: true,
+            tipo: true,
+            marca: true,
+            modelo: true,
+            identificacao: true,
+          },
+        },
+
+        usuario: {
+          select: {
             id_usuario: true,
-            status: true,
-            descricao_problema: true,
-            diagnostico: true,
-            solucao_aplicada: true,
-            valor_mao_obra: true,
-            valor_pecas: true,
+            nome: true,
+            email: true,
+            perfil: true,
+          },
+        },
+
+        itens_os: {
+          select: {
+            id_item_os: true,
+            id_catalogo_item: true,
+            quantidade: true,
+            valor_unitario: true,
             valor_total: true,
-            data_abertura: true,
-            data_previsao: true,
-            data_conclusao: true,
-            data_atualizacao: true,
+            status_aprovacao: true,
+            baixa_estoque: true,
+            data_cadastro: true,
 
-            // JOIN com Cliente
-            cliente: {
-                select: {
-                    id_cliente: true,
-                    nome: true,
-                    documento: true,
-                    telefone: true,
-                    email: true,
-                },
+            catalogo_item: {
+              select: {
+                id_catalogo_item: true,
+                descricao: true,
+                tipo_item: true,
+                unidade: true,
+                valor_unitario: true,
+              },
             },
+          },
+        },
+      },
+    })
 
-            ativo: {
-                select: {
-                    id_ativo: true,
-                    descricao: true,
-                    tipo: true,
-                    marca: true,
-                    modelo: true,
-                    identificacao: true,
-                },
-            },
+    if (!serviceOrderData) {
+      return null
+    }
 
-            usuario: {
-                select: {
-                    id_usuario: true,
-                    nome: true,
-                    email: true,
-                    perfil: true,
-                },
-            },
+    return {
+      ...serviceOrderData,
+      valor_mao_obra: Number(serviceOrderData.valor_mao_obra),
+      valor_pecas: Number(serviceOrderData.valor_pecas),
+      valor_total: Number(serviceOrderData.valor_total),
 
-            itens_os: {
-                select: {
-                    id_item_os: true,
-                    id_catalogo_item: true,
-                    quantidade: true,
-                    valor_unitario: true,
-                    valor_total: true,
-                    status_aprovacao: true,
-                    baixa_estoque: true,
-                    data_cadastro: true,
+      itens_os: serviceOrderData.itens_os.map((item) => ({
+        ...item,
+        quantidade: Number(item.quantidade),
+        valor_unitario: Number(item.valor_unitario),
+        valor_total: Number(item.valor_total),
+        catalogo_item: {
+          ...item.catalogo_item,
+          valor_unitario: Number(item.catalogo_item.valor_unitario),
+        },
+      })),
+    }
+  }
 
-                    catalogo_item: {
-                        select: {
-                            id_catalogo_item: true,
-                            descricao: true,
-                            tipo_item: true,
-                            unidade: true,
-                            valor_unitario: true,
-                        },
-                    },
-                },
-            },
+  async listAll() {
+    const serviceOrdersData = await this.prisma.ordemServico.findMany({
+      relationLoadStrategy: 'join',
+
+      select: {
+        id_ordem_servico: true,
+        id_cliente: true,
+        id_ativo: true,
+        id_usuario: true,
+        status: true,
+        descricao_problema: true,
+        diagnostico: true,
+        solucao_aplicada: true,
+        valor_mao_obra: true,
+        valor_pecas: true,
+        valor_total: true,
+        data_abertura: true,
+        data_previsao: true,
+        data_conclusao: true,
+        data_atualizacao: true,
+
+        cliente: {
+          select: {
+            id_cliente: true,
+            nome: true,
+            documento: true,
+            telefone: true,
+            email: true,
+          },
         },
 
-        orderBy: {
-            data_abertura: 'desc',
+        ativo: {
+          select: {
+            id_ativo: true,
+            descricao: true,
+            tipo: true,
+            marca: true,
+            modelo: true,
+            identificacao: true,
+          },
         },
+
+        usuario: {
+          select: {
+            id_usuario: true,
+            nome: true,
+            email: true,
+            perfil: true,
+          },
+        },
+
+        itens_os: {
+          select: {
+            id_item_os: true,
+            id_catalogo_item: true,
+            quantidade: true,
+            valor_unitario: true,
+            valor_total: true,
+            status_aprovacao: true,
+            baixa_estoque: true,
+            data_cadastro: true,
+
+            catalogo_item: {
+              select: {
+                id_catalogo_item: true,
+                descricao: true,
+                tipo_item: true,
+                unidade: true,
+                valor_unitario: true,
+              },
+            },
+          },
+        },
+      },
+
+      orderBy: {
+        data_abertura: 'desc',
+      },
     })
 
     return serviceOrdersData
-}
+  }
 
   private mapToDomain(data: any): OrdemServico {
     const serviceOrder = OrdemServico.recover(

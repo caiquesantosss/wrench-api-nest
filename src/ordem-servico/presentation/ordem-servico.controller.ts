@@ -34,7 +34,7 @@ import { OpenOsDTO, openOsSchema } from '../application/dtos/open-os.dto'
 import { AddDiagnosticDTO, addDiagnosticSchema } from '../application/dtos/add-diagnostic.dto'
 import { BudgetDefineDTO, budgetDefineSchema } from '../application/dtos/budget-define.dto'
 import { FinishServiceDTO, finishServiceSchema } from '../application/dtos/finish-service.dto'
-import { AddItemOsDTO, addItemOsSchema } from '../application/dtos/add-item-os.dto'
+import { AddItemOsDTO, addItemOsSchema, AddItemsOsDTO, addItemsOsSchema } from '../application/dtos/add-item-os.dto'
 import { CompleteServiceOrderDto } from '../application/dtos/complete-service.dto'
 import { UpdateEstimateCompletionDateDTO, updateEstimateCompletionDateSchema } from '../application/dtos/update-estimate-completion-date.dto'
 
@@ -51,6 +51,7 @@ import { CancelItemOsUseCase } from '../application/use-cases/cancel-item-os-use
 import { CompleteServiceOrderUseCase } from '../application/use-cases/complete-service-order-use-case'
 import { UpdateEstimateCompletionUseCase } from '../application/use-cases/update-estimate-completion-date-use-case'
 import { GetAllOSUseCase } from '../application/use-cases/get-all-os-use-case'
+import { GetOrderDetailsUseCase } from '../application/use-cases/find-order-by-id-use-case'
 
 @ApiTags('Ordem de Serviço')
 @ApiBearerAuth('JWT-auth')
@@ -68,7 +69,8 @@ export class OrdemServicoController {
         private readonly cancelItemOsUseCase: CancelItemOsUseCase,
         private readonly completeServiceOrderUseCase: CompleteServiceOrderUseCase,
         private readonly updateEstimateCompletionDateUseCase: UpdateEstimateCompletionUseCase,
-        private readonly getAllOSUseCase: GetAllOSUseCase
+        private readonly getAllOSUseCase: GetAllOSUseCase,
+        private readonly getOrderDetailsUseCase: GetOrderDetailsUseCase
     ) { }
 
     @Post()
@@ -327,43 +329,47 @@ export class OrdemServicoController {
 
     @Post(':id/itens')
     @ApiOperation({
-        summary: 'Adiciona uma peça ou serviço à Ordem de Serviço'
+        summary: 'Adiciona várias peças ou serviços à Ordem de Serviço',
     })
     @ApiParam({
         name: 'id',
         description: 'ID da Ordem de Serviço',
         type: Number,
-        example: 1
+        example: 1,
     })
     @ApiBody({
-        description: 'Dados do item do catálogo que será adicionado à OS',
+        description: 'Lista de peças e serviços que serão adicionados à OS',
         schema: {
-            type: 'object',
-            required: ['id_catalogo_item', 'quantidade'],
-            properties: {
-                id_catalogo_item: {
-                    type: 'number',
-                    example: 5
+            type: 'array',
+            minItems: 1,
+            items: {
+                type: 'object',
+                required: ['id_catalogo_item', 'quantidade'],
+                properties: {
+                    id_catalogo_item: {
+                        type: 'number',
+                        example: 5,
+                    },
+                    quantidade: {
+                        type: 'number',
+                        example: 2,
+                    },
                 },
-                quantidade: {
-                    type: 'number',
-                    example: 2
-                }
-            }
-        }
+            },
+        },
     })
     @ApiOkResponse({
-        description: 'Item adicionado à Ordem de Serviço com sucesso'
+        description: 'Itens adicionados à Ordem de Serviço com sucesso',
     })
     @ApiBadRequestResponse({
-        description: 'Dados inválidos ou item inativo'
+        description: 'Dados inválidos ou algum item inativo',
     })
     @ApiNotFoundResponse({
-        description: 'Ordem de Serviço ou item do catálogo não encontrado'
+        description: 'Ordem de Serviço ou item do catálogo não encontrado',
     })
-    async adicionarItem(
+    async adicionarItens(
         @Param('id', ParseIntPipe) id: number,
-        @Body(new ZodValidationPipe(addItemOsSchema)) body: AddItemOsDTO
+        @Body(new ZodValidationPipe(addItemsOsSchema)) body: AddItemsOsDTO,
     ) {
         const osAtualizada = await this.addItemOsUseCase.execute(id, body)
 
@@ -448,5 +454,37 @@ export class OrdemServicoController {
     })
     async listarOs() {
         return this.getAllOSUseCase.execute()
+    }
+
+    @Get('/:id')
+    @ApiOperation({
+        summary: 'Buscar detalhes de uma ordem de serviço',
+        description: 'Retorna os dados completos de uma OS, incluindo cliente, ativo, usuário responsável e itens.',
+    })
+    @ApiParam({
+        name: 'id',
+        description: 'Identificador da ordem de serviço.',
+        example: 1,
+    })
+    @ApiResponse({
+        status: 200,
+        description: 'Detalhes da ordem de serviço retornados com sucesso.',
+    })
+    @ApiResponse({
+        status: 400,
+        description: 'Identificador da ordem de serviço inválido.',
+    })
+    @ApiResponse({
+        status: 401,
+        description: 'Usuário não autenticado.',
+    })
+    @ApiResponse({
+        status: 404,
+        description: 'Ordem de serviço não encontrada.',
+    })
+    async buscarDetalhes(
+        @Param('id', ParseIntPipe) id: number,
+    ) {
+        return this.getOrderDetailsUseCase.execute(id)
     }
 }

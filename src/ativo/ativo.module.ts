@@ -9,6 +9,7 @@ import { ToggleAtivoStatusUseCase } from './application/use-cases/toggle-ativo-s
 import { UpdateDetailsAtivoUseCase } from './application/use-cases/update-details-ativo-use-case'
 import { ListAllAtivoUseCase } from './application/use-cases/list-all-ativo-use-case'
 import { ListAllAtivosWithClientUseCase } from './application/use-cases/list-all-ativo-with-client-use-case'
+import { ListAtivosByIdClienteUseCase } from './application/use-cases/list-ativo-by-cliente-id-use-case'
 
 @Module({
   controllers: [AtivoController],
@@ -27,7 +28,8 @@ import { ListAllAtivosWithClientUseCase } from './application/use-cases/list-all
     ListAllAtivoUseCase,
     ListAllAtivosWithClientUseCase,
     ToggleAtivoStatusUseCase,
-    UpdateDetailsAtivoUseCase
+    UpdateDetailsAtivoUseCase,
+    ListAtivosByIdClienteUseCase
   ],
   exports: ['AtivoRepository']
 })

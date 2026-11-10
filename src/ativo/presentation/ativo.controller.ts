@@ -40,6 +40,7 @@ import { UpdateDetailsAtivoUseCase } from '../application/use-cases/update-detai
 import { ListAllAtivoUseCase } from '../application/use-cases/list-all-ativo-use-case'
 import { ListAllAtivosWithClientUseCase } from '../application/use-cases/list-all-ativo-with-client-use-case'
 import { AtivoWithClientMapper } from './mappers/ativo-with-client.mapper'
+import { ListAtivosByIdClienteUseCase } from '../application/use-cases/list-ativo-by-cliente-id-use-case'
 
 @ApiTags('Ativos')
 @ApiBearerAuth('JWT-auth')
@@ -53,7 +54,8 @@ export class AtivoController {
         private readonly toggleAtivoStatusUseCase: ToggleAtivoStatusUseCase,
         private readonly updateDetailsAtivoUseCase: UpdateDetailsAtivoUseCase,
         private readonly listAllAtivoUseCase: ListAllAtivoUseCase,
-        private readonly listAllAtivosWithClientUseCase: ListAllAtivosWithClientUseCase
+        private readonly listAllAtivosWithClientUseCase: ListAllAtivosWithClientUseCase,
+        private readonly listAtivosByIdClienteUseCase: ListAtivosByIdClienteUseCase
     ) { }
 
     @Post()
@@ -223,4 +225,27 @@ export class AtivoController {
         return AtivoWithClientMapper.toHttpList(ativos)
     }
 
+    @Get('cliente/:id_cliente')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({
+        summary: 'Listar ativos por cliente',
+        description: 'Retorna todos os ativos vinculados ao cliente informado.'
+    })
+    @ApiParam({
+        name: 'id_cliente',
+        description: 'Identificador do cliente',
+        type: Number
+    })
+    @ApiOkResponse({
+        description: 'Lista de ativos do cliente retornada com sucesso.'
+    })
+    async listarPorCliente(
+        @Param('id_cliente', ParseIntPipe) id_cliente: number
+    ) {
+        const { ativos } = await this.listAtivosByIdClienteUseCase.execute({
+            id_cliente
+        })
+
+        return AtivoMapper.toHttpList(ativos)
+    }
 }
